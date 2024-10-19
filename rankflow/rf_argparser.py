@@ -22,7 +22,7 @@ class RFArgumentParser(argparse.ArgumentParser):
     """
     def __init__(self, *args, **kwargs):
         self.dest_set = set()
-        super().__init__()
+        super().__init__(*args, **kwargs)
         self.parser = argparse.ArgumentParser(add_help=False)  # 创建一个解析对象
         self.parser.add_argument('--config', type=str, default=None, help='JSON or YAML format.')
 
