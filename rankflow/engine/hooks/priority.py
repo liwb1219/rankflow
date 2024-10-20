@@ -30,7 +30,7 @@ def get_priority(priority: Union[int, str, HookPriority]) -> int:
             return priority
         else:
             raise ValueError(
-                f"Integer priority must be between 10 and 50."
+                "Integer priority must be between 10 and 50."
             )
     elif isinstance(priority, str):
         try:
