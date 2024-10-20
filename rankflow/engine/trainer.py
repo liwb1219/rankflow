@@ -170,14 +170,14 @@ class Trainer:
     def register_hook(
         self,
         hook: HookBase,
-        priority: Optional[int, str, HookPriority] = None,
+        priority: Optional[Union[int, str, HookPriority]] = None,
     ) -> None:
         assert isinstance(hook, HookBase), 'hook must be an instance of HookBase'
         if priority is not None:
             hook.priority = priority
 
         # 使用weakref.proxy创建当前Trainer的弱引用, 并将其赋值给Hook的trainer属性
-        # 使用弱引用的好吃是可以避免循环引用导致的内存泄漏问题
+        # 使用弱引用的好处是可以避免循环引用导致的内存泄漏问题
         # 这样Hook可以安全地访问Trainer, 但不会阻止Trainer被垃圾回收
         hook.trainer = weakref.proxy(self)
 
@@ -207,10 +207,10 @@ class Trainer:
             num_training_steps = self.max_epochs * len(self.train_dataloader)
             num_warmup_steps = warmup_ratio * num_training_steps
         else:
-            param_1 = f'\033[1;33m"warmup_steps"\033[0m'    # 黄色加粗
-            param_2 = f'\033[1;33m"warmup_ratio"\033[0m'    # 黄色加粗
+            param_1 = f'\033[1;33m"warmup_steps"\033[0m'  # 黄色加粗
+            param_2 = f'\033[1;33m"warmup_ratio"\033[0m'  # 黄色加粗
             raise ValueError(
-                f'\033[1;31mExactly one of {param_1} \033[1;31mor {param_2}\033[1;31mmust be specified.\033[0m'
+                f'\033[1;31mExactly one of {param_1} \033[1;31mor {param_2} \033[1;31mmust be specified.\033[0m'
             )
 
         optimizer, scheduler = self._build_optimizer_and_scheduler(
