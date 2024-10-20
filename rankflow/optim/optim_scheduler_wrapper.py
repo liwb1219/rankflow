@@ -80,7 +80,7 @@ class OptimSchedulerWrapper:
                 self._current_step >= self._num_training_steps - self._remaining_steps):
             # 最后一次更新参数, 使用剩余步数作为缩放因子
             # 这里判断使用`>=`是因为更新参数先调用scale_loss方法后调用backward方法
-            # 所以在这个方法中current_step时从0开始计数的, 最大为num_training_steps - 1
+            # 所以在这个方法中current_step是从0开始计数的, 最大为num_training_steps - 1
             loss_factor = self._remaining_steps
 
         loss = loss / loss_factor
