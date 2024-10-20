@@ -280,5 +280,5 @@ class Trainer:
 
 
 if __name__ == '__main__':
-    trainer = Trainer(model=nn.Linear(3, 3), enable_amp=False)
+    trainer = Trainer(model=nn.Linear(3, 3), enable_training=False)
     pass
