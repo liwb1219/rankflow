@@ -11,7 +11,7 @@ class RFArgumentParser(argparse.ArgumentParser):
     """
     参数优先级: 命令行 > 配置文件 > 默认
     内部解析器: 只用于解析配置文件参数,并将其余参数传递给外部解析器.
-    外部解析器: 负责解析所有通过add_argument()方法添加的参数.
+    外部解析器: 负责解析所有通过add_argument方法添加的参数.
     例如:
     parser = RFArgumentParser()
     parser.add_argument('--name', type=str, default='liwenbiao')
@@ -44,7 +44,7 @@ class RFArgumentParser(argparse.ArgumentParser):
         for arg in default_args:
             if arg not in self.dest_set:
                 arg = f'\033[1;33m"{arg}"\033[0m'                   # 黄色加粗
-                config_file = f'\033[1:32m"{config_file}"\033[0m'   # 绿色加粗
+                config_file = f'\033[1;32m"{config_file}"\033[0m'   # 绿色加粗
                 raise ValueError(
                     f'\033[1;31mInvalid parameter(s) {arg} \033[1;31mfound in configuration file: {config_file}\033[0m'
                 )
@@ -58,7 +58,7 @@ class RFArgumentParser(argparse.ArgumentParser):
         # 检查路径合法性
         path = Path(file_path)
         if not path.exists() or not path.is_file():
-            file_path = f'\033[1;32m"{file_path}"\033[0m'   # 绿色加粗
+            file_path = f'\033[1;32m"{file_path}"\033[0m'  # 绿色加粗
             raise FileNotFoundError(
                 f'\033[1;31mNo such file or directory: {file_path}\033[0m'
             )
@@ -68,14 +68,14 @@ class RFArgumentParser(argparse.ArgumentParser):
 
         # 根据后缀加载相应格式的文件
         if file_extension == '.json':
-            with open(file_path, 'r', encoding='utf-8') as file:
+            with open(path, 'r', encoding='utf-8') as file:
                 return json.load(file)
         elif file_extension in ['.yaml', '.yml']:
-            with open(file_path, 'r', encoding='utf-8') as file:
+            with open(path, 'r', encoding='utf-8') as file:
                 return yaml.safe_load(file)
         else:
             file_extension = f'\033[1;33m"{file_extension}"\033[0m'     # 黄色加粗
-            supported_formats = f'\033[1;32m.json, .yaml, .yml\033[0m'  # 绿色加粗
+            supported_formats = '\033[1;32m.json, .yaml, .yml\033[0m'  # 绿色加粗
             raise ValueError(
                 f'\033[1;31mUnsupported file format: {file_extension}\033[1;31m. '
                 f'Supported formats are: {supported_formats}\033[0m'
