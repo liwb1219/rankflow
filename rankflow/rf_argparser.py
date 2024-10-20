@@ -75,7 +75,7 @@ class RFArgumentParser(argparse.ArgumentParser):
                 return yaml.safe_load(file)
         else:
             file_extension = f'\033[1;33m"{file_extension}"\033[0m'     # 黄色加粗
-            supported_formats = '\033[1;32m.json, .yaml, .yml\033[0m'  # 绿色加粗
+            supported_formats = '\033[1;32m.json, .yaml, .yml\033[0m'   # 绿色加粗
             raise ValueError(
                 f'\033[1;31mUnsupported file format: {file_extension}\033[1;31m. '
                 f'Supported formats are: {supported_formats}\033[0m'
