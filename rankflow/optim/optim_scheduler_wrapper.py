@@ -34,7 +34,7 @@ class OptimSchedulerWrapper:
         num_training_steps: int = -1,
     ):
         """
-        :param optimizer: 优化器示例(如 torch.optim.Adam, torch.optim.SGD 等)
+        :param optimizer: 优化器实例(如 torch.optim.Adam, torch.optim.SGD 等)
         :param scheduler: 学习率调度器实例(如 torch.optim.lr_scheduler.StepLR 等)
         :param gradient_clipping_max_norm: 梯度裁剪的最大阈值(默认L2范数), 默认值为1.0
         :param gradient_accumulation_steps: 梯度累积的步数, 默认为1, 即不进行累计
@@ -77,7 +77,7 @@ class OptimSchedulerWrapper:
     def scale_loss(self, loss: torch.Tensor) -> torch.Tensor:
         loss_factor = self.gradient_accumulation_steps
         if (self._num_training_steps != -1 and
-                self._current_step == self._num_training_steps - self._remaining_steps):
+                self._current_step >= self._num_training_steps - self._remaining_steps):
             # 最后一次更新参数, 使用剩余步数作为缩放因子
             # 这里判断使用`>=`是因为更新参数先调用scale_loss方法后调用backward方法
             # 所以在这个方法中current_step时从0开始计数的, 最大为num_training_steps - 1
@@ -107,7 +107,7 @@ class OptimSchedulerWrapper:
         """ 梯度裁剪 """
         if self.gradient_clipping_max_norm is not None:
             if self.enable_amp:
-                self.scaler.unscale_(self.optimizer)  # 将优化器中的梯度反向缩放回原始值(取消缩放)
+                self.scaler.unscale_(self.optimizer)  # 将优化器中的梯度值反向缩放回原始值(取消缩放)
 
             """
             遍历所有参数组, 对每个参数组的参数进行裁剪, 不能写成:
