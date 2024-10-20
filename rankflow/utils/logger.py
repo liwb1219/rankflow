@@ -51,7 +51,7 @@ class ColoredFormatter(logging.Formatter):
             'ERROR': self.HIGHLIGHT_RED if enable_highlight_colors else self.RED,
             'CRITICAL': self.HIGHLIGHT_WHITE if enable_highlight_colors else self.WHITE,
         }
-        self.format_end =self.RESET
+        self.format_end = self.RESET
 
     def format(self, record):
         log_start = self.format_start[record.levelname]
