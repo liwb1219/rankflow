@@ -42,7 +42,7 @@ class ColoredFormatter(logging.Formatter):
     HIGHLIGHT_CYAN = '\033[1;36m'       # 高亮青色文本
     HIGHLIGHT_WHITE = '\033[1;37m'      # 高亮白色文本
 
-    def __init__(self, enable_highlight_colors: bool = True, *args, **kwargs):
+    def __init__(self, enable_highlight_colors: bool = False, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.format_start = {
             'DEBUG': self.HIGHLIGHT_BLUE if enable_highlight_colors else self.BLUE,
