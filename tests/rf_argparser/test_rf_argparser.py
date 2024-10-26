@@ -125,7 +125,7 @@ class TestRFArgumentParser(unittest.TestCase):
             parser.parse_args([
                 '--config', 'config.yml',
             ])
-        print(cm.exception)
+        print('', cm.exception, end='')
 
     # 不存在的配置文件
     def test_case_6(self):
@@ -139,7 +139,7 @@ class TestRFArgumentParser(unittest.TestCase):
             parser.parse_args([
                 '--config', 'config.json.bak',
             ])
-        print(cm.exception)
+        print('', cm.exception, end='')
 
     # 不支持的配置文件格式
     def test_case_7(self):
@@ -153,7 +153,7 @@ class TestRFArgumentParser(unittest.TestCase):
             parser.parse_args([
                 '--config', 'config.txt',
             ])
-        print(cm.exception)
+        print('', cm.exception, end='')
 
 
 if __name__ == '__main__':
