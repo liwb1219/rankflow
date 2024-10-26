@@ -43,8 +43,8 @@ class RFArgumentParser(argparse.ArgumentParser):
     def _validate_default_args(self, default_args: dict, config_file: str):
         for arg in default_args:
             if arg not in self.dest_set:
-                arg = f'\033[1;33m"{arg}"\033[0m'                   # 黄色加粗
-                config_file = f'\033[1;32m"{config_file}"\033[0m'   # 绿色加粗
+                arg = f"\033[1;33m'{arg}'\033[0m"                # 黄色加粗
+                config_file = f'\033[1;32m{config_file}\033[0m'  # 绿色加粗
                 raise ValueError(
                     f'\033[1;31mInvalid parameter(s) {arg} \033[1;31mfound in configuration file: {config_file}\033[0m'
                 )
@@ -58,7 +58,7 @@ class RFArgumentParser(argparse.ArgumentParser):
         # 检查路径合法性
         path = Path(file_path)
         if not path.exists() or not path.is_file():
-            file_path = f'\033[1;32m"{file_path}"\033[0m'  # 绿色加粗
+            file_path = f'\033[1;32m{file_path}\033[0m'  # 绿色加粗
             raise FileNotFoundError(
                 f'\033[1;31mNo such file or directory: {file_path}\033[0m'
             )
@@ -74,7 +74,7 @@ class RFArgumentParser(argparse.ArgumentParser):
             with open(path, 'r', encoding='utf-8') as file:
                 return yaml.safe_load(file)
         else:
-            file_extension = f'\033[1;33m"{file_extension}"\033[0m'     # 黄色加粗
+            file_extension = f'\033[1;33m{file_extension}\033[0m'     # 黄色加粗
             supported_formats = '\033[1;32m.json, .yaml, .yml\033[0m'   # 绿色加粗
             raise ValueError(
                 f'\033[1;31mUnsupported file format: {file_extension}\033[1;31m. '
