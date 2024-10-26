@@ -105,6 +105,56 @@ class TestRFArgumentParser(unittest.TestCase):
         self.assertEqual(args.job, 'Algorithm Engineer')
         self.assertEqual(args.email, 'liwb@qq.com')
 
+    # 配置文件中存在参数空间没有的参数
+    def test_case_5(self):
+        parser = RFArgumentParser()
+        parser.add_argument('--name', type=str, default='liwenbiao')
+        parser.add_argument('--gender', type=str, default='male')
+        parser.add_argument('--age', type=int, default=35)
+        parser.add_argument('--job', type=str, default='dogsbody')
+        parser.add_argument('--email', type=str, default='1758123337@qq.com')
+        """
+        name: liwenbiao
+        gender: male
+        age: 35
+        job: dogsbody
+        email: 1758123337@qq.com
+        address: Shanghai
+        """
+        with self.assertRaises(ValueError) as cm:
+            parser.parse_args([
+                '--config', 'config.yml',
+            ])
+        print(cm.exception)
+
+    # 不存在的配置文件
+    def test_case_6(self):
+        parser = RFArgumentParser()
+        parser.add_argument('--name', type=str, default='liwenbiao')
+        parser.add_argument('--gender', type=str, default='male')
+        parser.add_argument('--age', type=int, default=35)
+        parser.add_argument('--job', type=str, default='dogsbody')
+        parser.add_argument('--email', type=str, default='1758123337@qq.com')
+        with self.assertRaises(FileNotFoundError) as cm:
+            parser.parse_args([
+                '--config', 'config.json.bak',
+            ])
+        print(cm.exception)
+
+    # 不支持的配置文件格式
+    def test_case_7(self):
+        parser = RFArgumentParser()
+        parser.add_argument('--name', type=str, default='liwenbiao')
+        parser.add_argument('--gender', type=str, default='male')
+        parser.add_argument('--age', type=int, default=35)
+        parser.add_argument('--job', type=str, default='dogsbody')
+        parser.add_argument('--email', type=str, default='1758123337@qq.com')
+        with self.assertRaises(ValueError) as cm:
+            parser.parse_args([
+                '--config', 'config.txt',
+            ])
+        print(cm.exception)
+
 
 if __name__ == '__main__':
     unittest.main()
