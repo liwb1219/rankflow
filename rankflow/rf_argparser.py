@@ -10,7 +10,7 @@ from pathlib import Path
 class RFArgumentParser(argparse.ArgumentParser):
     """
     参数优先级: 命令行 > 配置文件 > 默认
-    内部解析器: 只用于解析配置文件参数,并将其余参数传递给外部解析器.
+    内部解析器: 只用于解析配置文件参数, 并将其余参数传递给外部解析器.
     外部解析器: 负责解析所有通过add_argument方法添加的参数.
     例如:
     parser = RFArgumentParser()
@@ -80,12 +80,3 @@ class RFArgumentParser(argparse.ArgumentParser):
                 f'\033[1;31mUnsupported file format: {file_extension}\033[1;31m. '
                 f'Supported formats are: {supported_formats}\033[0m'
             )
-
-
-if __name__ == '__main__':
-    parser = RFArgumentParser()
-    parser.add_argument('--name', type=str, default='liwenbiao')
-    parser.add_argument('--gender', type=str, default='male')
-    parser.add_argument('--age', type=int, default=35)
-    parser.add_argument('--job', type=str, default='dogsbody')
-    print(parser.parse_args())
