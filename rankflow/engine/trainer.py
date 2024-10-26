@@ -12,8 +12,8 @@ from transformers import get_scheduler
 
 import weakref
 
-from rankflow.engine.hooks.hookbase import HookBase
-from rankflow.engine.hooks.priority import HookPriority, get_priority
+from rankflow.engine.hooks import HookBase
+from rankflow.engine.hooks import HookPriority, get_priority
 from rankflow.utils.logger import setup_logger
 from rankflow.optim import OptimSchedulerWrapper
 
