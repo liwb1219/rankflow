@@ -31,8 +31,8 @@ class RFArgumentParser(argparse.ArgumentParser):
         self.dest_set.add(action.dest)  # 收集参数用于后续校验
         return action
 
-    def parse_args(self, args=None):
-        args, argv = self.parser.parse_known_args(args)
+    def parse_args(self, args=None, namespace=None):
+        args, argv = self.parser.parse_known_args(args, namespace)
         if args.config is not None:
             default_args = self._load_config_file(args.config)
             self._validate_default_args(default_args, args.config)
