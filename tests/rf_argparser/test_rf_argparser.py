@@ -4,6 +4,7 @@
 import unittest
 from rankflow import RFArgumentParser
 
+
 class TestRFArgumentParser(unittest.TestCase):
 
     # 测试默认参数
@@ -103,6 +104,7 @@ class TestRFArgumentParser(unittest.TestCase):
         self.assertEqual(args.age, 28)
         self.assertEqual(args.job, 'Algorithm Engineer')
         self.assertEqual(args.email, 'liwb@qq.com')
+
 
 if __name__ == '__main__':
     unittest.main()
