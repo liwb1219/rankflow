@@ -76,7 +76,7 @@ def setup_logger(
         handler.close()  # 关闭处理器 释放资源
 
     # 日志格式
-    default_format = '[%(asctime)s] [%(levelname)s] [%(filename)s:%(lineno)d:%(funcName)s] %(message)s'
+    default_format = '[%(asctime)s] [%(levelname)s] %(message)s'
     default_time_format = '%Y-%m-%d %H:%M:%S'
 
     # 创建控制台格式器
