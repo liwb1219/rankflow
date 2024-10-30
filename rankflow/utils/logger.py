@@ -106,13 +106,3 @@ def setup_logger(
         logger.warning(f'Failed to create file handler for {log_file}: {e}')
 
     return logger
-
-
-if __name__ == '__main__':
-    # test_logger = setup_logger(log_level='DEBUG', log_file='worker.log', file_mode='a')
-    test_logger = setup_logger()
-    test_logger.info('rankflow project')
-    test_logger.debug('rankflow project')
-    test_logger.warning('rankflow project')
-    test_logger.error('rankflow project')
-    test_logger.critical('rankflow project')
