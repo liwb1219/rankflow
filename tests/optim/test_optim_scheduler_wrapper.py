@@ -33,7 +33,7 @@ class ToyModelV2(nn.Module):
 
 class TestOptimSchedulerWrapper(unittest.TestCase):
     def test_optim_scheduler_wrapper(self):
-        model = ToyModel()
+        model = ToyModelV1()
         optimizer = torch.optim.AdamW(model.parameters(), lr=0.1)
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.99)
         loss_fct = nn.MSELoss()
