@@ -26,20 +26,35 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
         model = ToyModel()
         optimizer = torch.optim.AdamW(model.parameters(), lr=0.1)
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.99)
-        optim_scheduler = OptimSchedulerWrapper(
-            optimizer=optimizer,
-            scheduler=scheduler,
-            gradient_clipping_max_norm=1.0,
-            gradient_accumulation_steps=1,
-            enable_amp=True,
-            num_training_steps=-1,
-        )
-
         loss_fct = nn.MSELoss()
         for data, label in zip(torch.randn(100, 1), torch.randn(100, 1)):
             loss = loss_fct(model(data), label)
-            optim_scheduler.update_params(loss)
-            optim_scheduler.update_lr()
+
+            """
+            PyTorch模型训练核心步骤:
+                1. 梯度清零: optimizer.zero_grad()
+                2. 反向传播: loss.backward()
+                3. 参数更新: optimizer.step()
+            
+            它们之间的顺序要求:
+                1. 梯度清零 只能写在最前面或最后面
+                2. 反向传播 要写在 参数更新 之前
+            
+            所以有以下两种写法:
+            (1) optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+            (2) loss.backward()
+                optimizer.step()
+                optimizer.zero_grad()
+            """
+
+            optimizer.zero_grad()  # 梯度清零
+            loss.backward()  # 反向传播求解梯度
+            nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # 梯度裁剪
+            optimizer.step()  # 更新权重参数
+            scheduler.step()  # 更新学习率
 
 
 
