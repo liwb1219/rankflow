@@ -61,7 +61,7 @@ class OptimSchedulerWrapper:
             self.step()
             self.zero_grad()
 
-    def update_learning_rate(self):
+    def update_lr(self):
         """ 更新learning rate """
         self.scheduler.step()
 
