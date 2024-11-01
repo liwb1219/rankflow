@@ -34,6 +34,9 @@ class ToyModelV2(nn.Module):
 class TestOptimSchedulerWrapper(unittest.TestCase):
     def test_optim_scheduler_wrapper(self):
         model = ToyModelV1()
+
+        model.state_dict()
+
         optimizer = torch.optim.AdamW(model.parameters(), lr=0.1)
         scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.99)
         loss_fct = nn.MSELoss()
@@ -66,7 +69,9 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
             optimizer.step()  # 更新权重参数
             scheduler.step()  # 更新学习率
 
-            print(scheduler.get_lr(), {name: param for name, param in model.named_parameters()})
+            # print(scheduler.get_lr(), {name: param for name, param in model.named_parameters()})
+
+
 
 
 
