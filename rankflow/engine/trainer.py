@@ -159,7 +159,7 @@ class Trainer:
             loss = self.model(**batch)['loss']
 
         self.optim_scheduler.update_params(loss)
-        self.optim_scheduler.update_learning_rate()
+        self.optim_scheduler.update_lr()
         self.call_hooks('after_iter')
 
     def call_hooks(self, fn_name: str) -> None:
