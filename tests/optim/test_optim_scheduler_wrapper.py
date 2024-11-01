@@ -8,7 +8,17 @@ import torch.nn.functional as F
 from rankflow.optim import OptimSchedulerWrapper
 
 
-class ToyModel(nn.Module):
+class ToyModelV1(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.fc = nn.Linear(1, 1)
+
+    def forward(self, x):
+        x = self.fc(x)
+        return x
+
+
+class ToyModelV2(nn.Module):
     def __init__(self):
         super().__init__()
         self.fc1 = nn.Linear(1, 4)
@@ -55,6 +65,8 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
             nn.utils.clip_grad_norm_(model.parameters(), 1.0)  # 梯度裁剪
             optimizer.step()  # 更新权重参数
             scheduler.step()  # 更新学习率
+
+            print(scheduler.get_lr(), {name: param for name, param in model.named_parameters()})
 
 
 
