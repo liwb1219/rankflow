@@ -32,7 +32,9 @@ class ToyModelV2(nn.Module):
 
 
 class TestOptimSchedulerWrapper(unittest.TestCase):
-    def test_optim_scheduler_wrapper(self):
+
+    # 测试基础功能是否和常用模版一致
+    def test_optim_scheduler_wrapper_1(self):
         input_tensors = torch.randn(100, 1)
         label_tensors = torch.randn(100, 1)
         learning_rate = 0.1
