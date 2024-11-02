@@ -55,6 +55,26 @@ class OptimSchedulerWrapper:
             self._remaining_steps = remaining_steps if remaining_steps > 0 else gradient_accumulation_steps
 
     def update_params(self, loss: torch.Tensor):
+        """ 反向传播 & 参数更新 & 梯度清零 """
+        """
+        PyTorch模型训练核心步骤:
+            1. 梯度清零: optimizer.zero_grad()
+            2. 反向传播: loss.backward()
+            3. 参数更新: optimizer.step()
+
+        它们之间的顺序要求:
+            1. 梯度清零 只能写在最前面或最后面
+            2. 反向传播 要写在 参数更新 之前
+
+        所以有以下两种写法:
+        (1) optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+
+        (2) loss.backward()
+            optimizer.step()
+            optimizer.zero_grad()
+        """
         loss = self.scale_loss(loss)
         self.backward(loss)
         if self.should_update_params():
