@@ -37,9 +37,9 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
         label_tensors = torch.randn(100, 1)
         loss_fct = nn.MSELoss()
 
-        model_a = ToyModelV1()
+        model_a = ToyModelV2()
 
-        model_b = ToyModelV1()
+        model_b = ToyModelV2()
         model_b.load_state_dict(model_a.state_dict())
 
         optimizer_a = torch.optim.AdamW(model_a.parameters(), lr=0.1)
@@ -57,9 +57,9 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
             res_a_list.append(
                 (
-                    loss,
+                    loss.item(),
                     scheduler_a.get_lr(),
-                    {name: param for name, param in model_a.named_parameters()},
+                    [param.cpu().tolist() for param in model_a.parameters()],
                 )
             )
 
@@ -82,15 +82,13 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
             res_b_list.append(
                 (
-                    loss,
+                    loss.item(),
                     optim_scheduler_b.get_lr(),
-                    {name: param for name, param in model_b.named_parameters()},
+                    [param.cpu().tolist() for param in model_b.parameters()],
                 )
             )
 
         self.assertListEqual(res_a_list, res_b_list)
-
-
 
 
 
