@@ -35,6 +35,10 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
     def test_optim_scheduler_wrapper(self):
         input_tensors = torch.randn(100, 1)
         label_tensors = torch.randn(100, 1)
+        learning_rate = 0.1
+        step_size = 1
+        gamma = 0.99
+        gradient_clipping_max_norm = 1.0
         loss_fct = nn.MSELoss()
 
         model_a = ToyModelV2()
@@ -43,14 +47,14 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
         # 将模型a的参数复制给模型b
         model_b.load_state_dict(model_a.state_dict())
 
-        optimizer_a = torch.optim.AdamW(model_a.parameters(), lr=0.1)
-        scheduler_a = torch.optim.lr_scheduler.StepLR(optimizer_a, step_size=1, gamma=0.99)
+        optimizer_a = torch.optim.AdamW(model_a.parameters(), lr=learning_rate)
+        scheduler_a = torch.optim.lr_scheduler.StepLR(optimizer_a, step_size=step_size, gamma=gamma)
         res_a_list = []
         for data, label in zip(input_tensors, label_tensors):
             loss = loss_fct(model_a(data), label)
 
             loss.backward()  # 反向传播求解梯度
-            nn.utils.clip_grad_norm_(model_a.parameters(), 1.0)  # 梯度裁剪
+            nn.utils.clip_grad_norm_(model_a.parameters(), gradient_clipping_max_norm)  # 梯度裁剪
             optimizer_a.step()  # 更新权重参数
             optimizer_a.zero_grad()  # 梯度清零
 
@@ -64,14 +68,14 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 )
             )
 
-        optimizer_b = torch.optim.AdamW(model_b.parameters(), lr=0.1)
-        scheduler_b = torch.optim.lr_scheduler.StepLR(optimizer_b, step_size=1, gamma=0.99)
+        optimizer_b = torch.optim.AdamW(model_b.parameters(), lr=learning_rate)
+        scheduler_b = torch.optim.lr_scheduler.StepLR(optimizer_b, step_size=step_size, gamma=gamma)
         optim_scheduler_b = OptimSchedulerWrapper(
             optimizer_b,
             scheduler_b,
-            gradient_clipping_max_norm=1.0,
+            gradient_clipping_max_norm=gradient_clipping_max_norm,
             gradient_accumulation_steps=1,
-            enable_amp=True,
+            enable_amp=False,
             num_training_steps=-1,
         )
         res_b_list = []
