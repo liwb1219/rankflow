@@ -38,8 +38,9 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
         loss_fct = nn.MSELoss()
 
         model_a = ToyModelV2()
-
         model_b = ToyModelV2()
+
+        # 将模型a的参数复制给模型b
         model_b.load_state_dict(model_a.state_dict())
 
         optimizer_a = torch.optim.AdamW(model_a.parameters(), lr=0.1)
