@@ -88,8 +88,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 )
             )
 
-        for (x, y) in zip(res_a_list, res_b_list):
-            assert x == y
+        self.assertListEqual(res_a_list, res_b_list)
 
 
 
