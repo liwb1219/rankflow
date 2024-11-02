@@ -33,6 +33,8 @@ class ToyModelV2(nn.Module):
 
 class TestOptimSchedulerWrapper(unittest.TestCase):
     def test_optim_scheduler_wrapper(self):
+        input_tensors = torch.randn(100, 1)
+        label_tensors = torch.randn(100, 1)
         loss_fct = nn.MSELoss()
 
         model_a = ToyModelV1()
@@ -43,7 +45,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
         optimizer_a = torch.optim.AdamW(model_a.parameters(), lr=0.1)
         scheduler_a = torch.optim.lr_scheduler.StepLR(optimizer_a, step_size=1, gamma=0.99)
         res_a_list = []
-        for data, label in zip(torch.randn(100, 1), torch.randn(100, 1)):
+        for data, label in zip(input_tensors, label_tensors):
             loss = loss_fct(model_a(data), label)
 
             loss.backward()  # 反向传播求解梯度
@@ -61,8 +63,33 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 )
             )
 
-        for i in res_a_list:
-            print(i)
+        optimizer_b = torch.optim.AdamW(model_b.parameters(), lr=0.1)
+        scheduler_b = torch.optim.lr_scheduler.StepLR(optimizer_b, step_size=1, gamma=0.99)
+        optim_scheduler_b = OptimSchedulerWrapper(
+            optimizer_b,
+            scheduler_b,
+            gradient_clipping_max_norm=1.0,
+            gradient_accumulation_steps=1,
+            enable_amp=True,
+            num_training_steps=-1,
+        )
+        res_b_list = []
+        for data, label in zip(input_tensors, label_tensors):
+            loss = loss_fct(model_b(data), label)
+
+            optim_scheduler_b.update_params(loss)
+            optim_scheduler_b.update_lr()
+
+            res_b_list.append(
+                (
+                    loss,
+                    optim_scheduler_b.get_lr(),
+                    {name: param for name, param in model_b.named_parameters()},
+                )
+            )
+
+        for (x, y) in zip(res_a_list, res_b_list):
+            assert x == y
 
 
 
