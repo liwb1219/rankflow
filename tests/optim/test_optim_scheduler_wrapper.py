@@ -216,7 +216,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 )
 
         optimizer_b, scheduler_b = build_optimizer_and_scheduler(
-            model=model_a,
+            model=model_b,
             num_training_steps=num_training_steps,
             num_warmup_steps=num_warmup_steps,
         )
@@ -254,7 +254,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 cnt_a += 1
             else:
                 cnt_b += 1
-                print(x, y)
+                # print(x, y)
         print(cnt_a, cnt_b)
 
 
