@@ -254,7 +254,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 cnt_a += 1
             else:
                 cnt_b += 1
-                # print(x, y)
+                print(x, y)
         print(cnt_a, cnt_b)
 
 
