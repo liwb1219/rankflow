@@ -2,6 +2,7 @@
 # Copyright (c) 2024 liwenbiao. All rights reserved.
 
 import unittest
+import random
 from typing import Tuple
 from transformers import get_scheduler
 import torch
@@ -42,11 +43,12 @@ def build_optimizer_and_scheduler(
 
 
 class ToyDataset(Dataset):
-    def __init__(self, data: list):
-        self.data = data
+    def __init__(self, data_size: int = 100):
+        self.data = [(random.random(), random.random()) for _ in range(data_size)]
+        self.label = [random.random() for _ in range(data_size)]
 
     def __getitem__(self, item):
-        return self.data[item]
+        return torch.tensor(self.data[item]), torch.tensor(self.label[item])
 
     def __len__(self):
         return len(self.data)
@@ -75,50 +77,71 @@ class ToyModelV2(nn.Module):
         return x
 
 
+class ToyModelV3(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.fc1 = nn.Linear(2, 4)
+        self.fc2 = nn.Linear(4, 1)
+
+    def forward(self, x):
+        x = self.fc1(x)
+        x = F.relu(x)
+        x = self.fc2(x)
+        return x
+
+
 class TestOptimSchedulerWrapper(unittest.TestCase):
 
     # 测试基础功能是否和常用模版一致
     def test_optim_scheduler_wrapper_1(self):
         max_epochs = 3
         batch_size = 8
+        warmup_ratio = 0.1
 
-        input_tensors = torch.randn(100, 1)
-        label_tensors = torch.randn(100, 1)
+        dataset = ToyDataset(data_size=1000)
+        data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
-        # gradient_clipping_max_norm = 1.0
+        num_training_steps = max_epochs * len(data_loader)
+        num_warmup_steps = int(warmup_ratio * num_training_steps)
+
+        gradient_clipping_max_norm = 1.0
+
         loss_fct = nn.MSELoss()
 
-        model_a = ToyModelV2()
-        model_b = ToyModelV2()
+        model_a = ToyModelV3()
+        model_b = ToyModelV3()
 
         # 将模型a的参数复制给模型b
         model_b.load_state_dict(model_a.state_dict())
 
-        optimizer_a, scheduler_b = build_optimizer_and_scheduler(
+        optimizer_a, scheduler_a = build_optimizer_and_scheduler(
             model=model_a,
-            num_training_steps=100,
-            num_warmup_steps=10,
+            num_training_steps=num_training_steps,
+            num_warmup_steps=num_warmup_steps,
         )
 
         res_a_list = []
-        for data, label in zip(input_tensors, label_tensors):
-            print(data.size(), label.size())
-            loss = loss_fct(model_a(data), label)
+        for epoch in range(max_epochs):
+            for data, label in data_loader:
+                loss = loss_fct(model_a(data), label)
 
-            # loss.backward()  # 反向传播求解梯度
-            # nn.utils.clip_grad_norm_(model_a.parameters(), gradient_clipping_max_norm)  # 梯度裁剪
-            # optimizer_a.step()  # 更新权重参数
-            # optimizer_a.zero_grad()  # 梯度清零
-            #
-            # scheduler_a.step()  # 更新学习率
-            #
-            # res_a_list.append(
-            #     (
-            #         loss.item(),
-            #         scheduler_a.get_lr(),
-            #         [param.cpu().tolist() for param in model_a.parameters()],
-            #     )
-            # )
+                loss.backward()  # 反向传播求解梯度
+                nn.utils.clip_grad_norm_(model_a.parameters(), gradient_clipping_max_norm)  # 梯度裁剪
+                optimizer_a.step()  # 更新权重参数
+                optimizer_a.zero_grad()  # 梯度清零
+
+                scheduler_a.step()  # 更新学习率
+
+                res_a_list.append(
+                    (
+                        loss.item(),
+                        scheduler_a.get_lr(),
+                        [param.cpu().tolist() for param in model_a.parameters()],
+                    )
+                )
+
+        for i in res_a_list:
+            print(i)
 
         # optimizer_b = torch.optim.AdamW(model_b.parameters(), lr=learning_rate)
         # scheduler_b = torch.optim.lr_scheduler.StepLR(optimizer_b, step_size=step_size, gamma=gamma)
