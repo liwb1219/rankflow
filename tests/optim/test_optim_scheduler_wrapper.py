@@ -94,84 +94,6 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
     # 测试基础功能是否和常用模版一致
     def test_optim_scheduler_wrapper_1(self):
-        max_epochs = 3
-        batch_size = 8
-        warmup_ratio = 0.1
-
-        dataset = ToyDataset(data_size=1000)
-        data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
-
-        num_training_steps = max_epochs * len(data_loader)
-        num_warmup_steps = int(warmup_ratio * num_training_steps)
-
-        gradient_clipping_max_norm = 1.0
-
-        loss_fct = nn.MSELoss()
-
-        model_a = ToyModelV3()
-        model_b = ToyModelV3()
-
-        # 将模型a的参数复制给模型b
-        model_b.load_state_dict(model_a.state_dict())
-
-        optimizer_a, scheduler_a = build_optimizer_and_scheduler(
-            model=model_a,
-            num_training_steps=num_training_steps,
-            num_warmup_steps=num_warmup_steps,
-        )
-
-        res_a_list = []
-        for epoch in range(max_epochs):
-            for data, label in data_loader:
-                loss = loss_fct(model_a(data), label)
-
-                loss.backward()  # 反向传播求解梯度
-                nn.utils.clip_grad_norm_(model_a.parameters(), gradient_clipping_max_norm)  # 梯度裁剪
-                optimizer_a.step()  # 更新权重参数
-                optimizer_a.zero_grad()  # 梯度清零
-
-                scheduler_a.step()  # 更新学习率
-
-                res_a_list.append(
-                    (
-                        loss.item(),
-                        scheduler_a.get_lr(),
-                        [param.cpu().tolist() for param in model_a.parameters()],
-                    )
-                )
-
-        for i in res_a_list:
-            print(i)
-
-        # optimizer_b = torch.optim.AdamW(model_b.parameters(), lr=learning_rate)
-        # scheduler_b = torch.optim.lr_scheduler.StepLR(optimizer_b, step_size=step_size, gamma=gamma)
-        # optim_scheduler_b = OptimSchedulerWrapper(
-        #     optimizer_b,
-        #     scheduler_b,
-        #     gradient_clipping_max_norm=gradient_clipping_max_norm,
-        #     gradient_accumulation_steps=1,
-        #     enable_amp=False,
-        #     num_training_steps=-1,
-        # )
-        # res_b_list = []
-        # for data, label in zip(input_tensors, label_tensors):
-        #     loss = loss_fct(model_b(data), label)
-        #
-        #     optim_scheduler_b.update_params(loss)
-        #     optim_scheduler_b.update_lr()
-        #
-        #     res_b_list.append(
-        #         (
-        #             loss.item(),
-        #             optim_scheduler_b.get_lr(),
-        #             [param.cpu().tolist() for param in model_b.parameters()],
-        #         )
-        #     )
-        #
-        # self.assertListEqual(res_a_list, res_b_list)
-
-    # 测试epoch训练(无梯度累积)
-    def test_optim_scheduler_wrapper_2(self):
         input_tensors = torch.randn(100, 1)
         label_tensors = torch.randn(100, 1)
         learning_rate = 0.1
@@ -231,6 +153,86 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                     [param.cpu().tolist() for param in model_b.parameters()],
                 )
             )
+
+        self.assertListEqual(res_a_list, res_b_list)
+
+    # 测试epoch训练(无梯度累积)
+    def test_optim_scheduler_wrapper_2(self):
+        max_epochs = 3
+        batch_size = 8
+        warmup_ratio = 0.1
+
+        dataset = ToyDataset(data_size=1000)
+        data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
+
+        num_training_steps = max_epochs * len(data_loader)
+        num_warmup_steps = int(warmup_ratio * num_training_steps)
+
+        gradient_clipping_max_norm = 1.0
+
+        loss_fct = nn.MSELoss()
+
+        model_a = ToyModelV3()
+        model_b = ToyModelV3()
+
+        # 将模型a的参数复制给模型b
+        model_b.load_state_dict(model_a.state_dict())
+
+        optimizer_a, scheduler_a = build_optimizer_and_scheduler(
+            model=model_a,
+            num_training_steps=num_training_steps,
+            num_warmup_steps=num_warmup_steps,
+        )
+
+        res_a_list = []
+        for epoch in range(max_epochs):
+            for data, label in data_loader:
+                loss = loss_fct(model_a(data), label)
+
+                loss.backward()  # 反向传播求解梯度
+                nn.utils.clip_grad_norm_(model_a.parameters(), gradient_clipping_max_norm)  # 梯度裁剪
+                optimizer_a.step()  # 更新权重参数
+                optimizer_a.zero_grad()  # 梯度清零
+
+                scheduler_a.step()  # 更新学习率
+
+                res_a_list.append(
+                    (
+                        loss.item(),
+                        scheduler_a.get_lr(),
+                        [param.cpu().tolist() for param in model_a.parameters()],
+                    )
+                )
+
+        optimizer_b, scheduler_b = build_optimizer_and_scheduler(
+            model=model_a,
+            num_training_steps=num_training_steps,
+            num_warmup_steps=num_warmup_steps,
+        )
+        optim_scheduler_b = OptimSchedulerWrapper(
+            optimizer_b,
+            scheduler_b,
+            gradient_clipping_max_norm=gradient_clipping_max_norm,
+            gradient_accumulation_steps=1,
+            enable_amp=False,
+            num_training_steps=num_training_steps,
+        )
+
+        res_b_list = []
+        for epoch in range(max_epochs):
+            for data, label in data_loader:
+                loss = loss_fct(model_a(data), label)
+
+                optim_scheduler_b.update_params(loss)
+                optim_scheduler_b.update_lr()
+
+                res_b_list.append(
+                    (
+                        loss.item(),
+                        optim_scheduler_b.get_lr(),
+                        [param.cpu().tolist() for param in model_b.parameters()],
+                    )
+                )
 
         self.assertListEqual(res_a_list, res_b_list)
 
