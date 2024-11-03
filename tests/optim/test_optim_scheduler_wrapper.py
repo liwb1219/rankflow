@@ -2,10 +2,54 @@
 # Copyright (c) 2024 liwenbiao. All rights reserved.
 
 import unittest
+from typing import Tuple
+from transformers import get_scheduler
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader
 from rankflow.optim import OptimSchedulerWrapper
+
+
+def build_optimizer_and_scheduler(
+        model: nn.Module,
+        num_training_steps: int,
+        num_warmup_steps: int,
+        learning_rate: float = 3e-5,
+        weight_decay: float = 1e-2,
+        adam_epsilon: float = 1e-5,
+        scheduler_type: str = 'linear',
+) -> Tuple[torch.optim.Optimizer, torch.optim.lr_scheduler.LRScheduler]:
+    no_decay = ['bias', 'LayerNorm.weight']
+    optimizer_grouped_parameters = [
+        {
+            'params': [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
+            'weight_decay': weight_decay,
+        },
+        {
+            'params': [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)],
+            'weight_decay': 0.0,
+        }
+    ]
+    optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=learning_rate, eps=adam_epsilon)
+    scheduler = get_scheduler(
+        name=scheduler_type,
+        optimizer=optimizer,
+        num_warmup_steps=num_warmup_steps,
+        num_training_steps=num_training_steps,
+    )
+    return optimizer, scheduler
+
+
+class ToyDataset(Dataset):
+    def __init__(self, data: list):
+        self.data = data
+
+    def __getitem__(self, item):
+        return self.data[item]
+
+    def __len__(self):
+        return len(self.data)
 
 
 class ToyModelV1(nn.Module):
@@ -35,6 +79,76 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
     # 测试基础功能是否和常用模版一致
     def test_optim_scheduler_wrapper_1(self):
+        max_epochs = 3
+        batch_size = 8
+
+        input_tensors = torch.randn(100, 1)
+        label_tensors = torch.randn(100, 1)
+
+        # gradient_clipping_max_norm = 1.0
+        loss_fct = nn.MSELoss()
+
+        model_a = ToyModelV2()
+        model_b = ToyModelV2()
+
+        # 将模型a的参数复制给模型b
+        model_b.load_state_dict(model_a.state_dict())
+
+        optimizer_a, scheduler_b = build_optimizer_and_scheduler(
+            model=model_a,
+            num_training_steps=100,
+            num_warmup_steps=10,
+        )
+
+        res_a_list = []
+        for data, label in zip(input_tensors, label_tensors):
+            print(data.size(), label.size())
+            loss = loss_fct(model_a(data), label)
+
+            # loss.backward()  # 反向传播求解梯度
+            # nn.utils.clip_grad_norm_(model_a.parameters(), gradient_clipping_max_norm)  # 梯度裁剪
+            # optimizer_a.step()  # 更新权重参数
+            # optimizer_a.zero_grad()  # 梯度清零
+            #
+            # scheduler_a.step()  # 更新学习率
+            #
+            # res_a_list.append(
+            #     (
+            #         loss.item(),
+            #         scheduler_a.get_lr(),
+            #         [param.cpu().tolist() for param in model_a.parameters()],
+            #     )
+            # )
+
+        # optimizer_b = torch.optim.AdamW(model_b.parameters(), lr=learning_rate)
+        # scheduler_b = torch.optim.lr_scheduler.StepLR(optimizer_b, step_size=step_size, gamma=gamma)
+        # optim_scheduler_b = OptimSchedulerWrapper(
+        #     optimizer_b,
+        #     scheduler_b,
+        #     gradient_clipping_max_norm=gradient_clipping_max_norm,
+        #     gradient_accumulation_steps=1,
+        #     enable_amp=False,
+        #     num_training_steps=-1,
+        # )
+        # res_b_list = []
+        # for data, label in zip(input_tensors, label_tensors):
+        #     loss = loss_fct(model_b(data), label)
+        #
+        #     optim_scheduler_b.update_params(loss)
+        #     optim_scheduler_b.update_lr()
+        #
+        #     res_b_list.append(
+        #         (
+        #             loss.item(),
+        #             optim_scheduler_b.get_lr(),
+        #             [param.cpu().tolist() for param in model_b.parameters()],
+        #         )
+        #     )
+        #
+        # self.assertListEqual(res_a_list, res_b_list)
+
+    # 测试epoch训练(无梯度累积)
+    def test_optim_scheduler_wrapper_2(self):
         input_tensors = torch.randn(100, 1)
         label_tensors = torch.randn(100, 1)
         learning_rate = 0.1
@@ -97,6 +211,9 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
         self.assertListEqual(res_a_list, res_b_list)
 
+    # 测试epoch训练(有梯度累积)
+    def test_optim_scheduler_wrapper_3(self):
+        pass
 
 
 if __name__ == '__main__':
