@@ -221,7 +221,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
         res_b_list = []
         for epoch in range(max_epochs):
             for data, label in data_loader:
-                loss = loss_fct(model_a(data), label)
+                loss = loss_fct(model_b(data), label)
 
                 optim_scheduler_b.update_params(loss)
                 optim_scheduler_b.update_lr()
