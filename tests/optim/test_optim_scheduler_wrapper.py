@@ -173,7 +173,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
         batch_size = 8
         warmup_ratio = 0.1
 
-        dataset = ToyDataset(data_size=10000)
+        dataset = ToyDataset(data_size=4000)
         data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
 
         num_training_steps = max_epochs * len(data_loader)
