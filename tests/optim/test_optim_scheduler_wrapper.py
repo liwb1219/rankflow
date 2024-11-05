@@ -258,7 +258,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
         diff_ratio = diff / len(res_a_list)
 
-        self.assertLessEqual(diff_ratio, 0.01)
+        self.assertLessEqual(diff_ratio, 0.01, f'diff率: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
 
     # 测试epoch训练(有梯度累积)
     def test_optim_scheduler_wrapper_3(self):
