@@ -143,8 +143,8 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
         optimizer_b = torch.optim.AdamW(model_b.parameters(), lr=learning_rate)
         scheduler_b = torch.optim.lr_scheduler.StepLR(optimizer_b, step_size=step_size, gamma=gamma)
         optim_scheduler_b = OptimSchedulerWrapper(
-            optimizer_b,
-            scheduler_b,
+            optimizer=optimizer_b,
+            scheduler=scheduler_b,
             gradient_clipping_max_norm=gradient_clipping_max_norm,
             gradient_accumulation_steps=1,
             enable_amp=False,
@@ -221,8 +221,8 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
             num_warmup_steps=num_warmup_steps,
         )
         optim_scheduler_b = OptimSchedulerWrapper(
-            optimizer_b,
-            scheduler_b,
+            optimizer=optimizer_b,
+            scheduler=scheduler_b,
             gradient_clipping_max_norm=gradient_clipping_max_norm,
             gradient_accumulation_steps=1,
             enable_amp=False,
@@ -254,11 +254,10 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 cnt_a += 1
             else:
                 cnt_b += 1
-                print(x, y)
-        print(cnt_a, cnt_b)
+        #         print(x, y)
+        # print(cnt_a, cnt_b)
 
-
-        # self.assertListEqual(res_a_list, res_b_list)
+        self.assertListEqual(res_a_list, res_b_list)
 
     # 测试epoch训练(有梯度累积)
     def test_optim_scheduler_wrapper_3(self):
