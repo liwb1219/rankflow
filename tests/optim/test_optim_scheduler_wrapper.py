@@ -258,7 +258,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
         diff_ratio = diff / len(res_a_list)
 
-        print(f'diff率: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
+        print(f'diff率v2: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
         self.assertLessEqual(a=diff_ratio, b=0.1)
 
     # 测试epoch训练(有梯度累积)
@@ -313,6 +313,11 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                     ]
                 )
 
+        if steps % gradient_accumulation_steps != 0:
+            optimizer_a.step()  # 更新权重参数
+            optimizer_a.zero_grad()  # 梯度清零
+
+
         optimizer_b, scheduler_b = build_optimizer_and_scheduler(
             model=model_b,
             num_training_steps=num_training_steps,
@@ -322,7 +327,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
             optimizer=optimizer_b,
             scheduler=scheduler_b,
             gradient_clipping_max_norm=gradient_clipping_max_norm,
-            gradient_accumulation_steps=7,
+            gradient_accumulation_steps=gradient_accumulation_steps,
             enable_amp=False,
             num_training_steps=num_training_steps,
         )
@@ -356,7 +361,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
         diff_ratio = diff / len(res_a_list)
 
-        print(f'diff率: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
+        print(f'diff率v3: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
         self.assertLessEqual(a=diff_ratio, b=0.1)
 
 
