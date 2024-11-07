@@ -344,7 +344,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
         same = 0
         diff = 0
-        for (a, b) in zip(res_a_list, res_b_list):
+        for a, b in zip(res_a_list, res_b_list):
             if abs(a - b) < 0.001:
                 same += 1
             else:
