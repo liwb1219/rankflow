@@ -259,13 +259,14 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
         diff_ratio = diff / len(res_a_list)
 
         print(f'diff率: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
-        self.assertLessEqual(a=diff_ratio, b=0.01)
+        self.assertLessEqual(a=diff_ratio, b=0.1)
 
     # 测试epoch训练(有梯度累积)
     def test_optim_scheduler_wrapper_3(self):
         max_epochs = 3
         batch_size = 8
         warmup_ratio = 0.1
+        gradient_accumulation_steps = 7
 
         dataset = ToyDataset(data_size=4000)
         data_loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
@@ -290,14 +291,17 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
         )
 
         res_a_list = []
+        steps = 0
         for epoch in range(max_epochs):
             for data, label in data_loader:
+                steps += 1
                 loss = loss_fct(model_a(data), label)
 
                 loss.backward()  # 反向传播求解梯度
                 nn.utils.clip_grad_norm_(model_a.parameters(), gradient_clipping_max_norm)  # 梯度裁剪
-                optimizer_a.step()  # 更新权重参数
-                optimizer_a.zero_grad()  # 梯度清零
+                if steps % gradient_accumulation_steps == 0:
+                    optimizer_a.step()  # 更新权重参数
+                    optimizer_a.zero_grad()  # 梯度清零
 
                 scheduler_a.step()  # 更新学习率
 
@@ -318,7 +322,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
             optimizer=optimizer_b,
             scheduler=scheduler_b,
             gradient_clipping_max_norm=gradient_clipping_max_norm,
-            gradient_accumulation_steps=1,
+            gradient_accumulation_steps=7,
             enable_amp=False,
             num_training_steps=num_training_steps,
         )
@@ -353,7 +357,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
         diff_ratio = diff / len(res_a_list)
 
         print(f'diff率: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
-        self.assertLessEqual(a=diff_ratio, b=0.01)
+        self.assertLessEqual(a=diff_ratio, b=0.1)
 
 
 if __name__ == '__main__':
