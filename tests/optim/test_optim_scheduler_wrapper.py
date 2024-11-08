@@ -9,6 +9,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
+from torch.cuda.amp import autocast, GradScaler
 from rankflow.optim import OptimSchedulerWrapper
 
 
@@ -486,12 +487,16 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
         optimizer_a = torch.optim.AdamW(model_a.parameters(), lr=learning_rate)
         scheduler_a = torch.optim.lr_scheduler.StepLR(optimizer_a, step_size=step_size, gamma=gamma)
         res_a_list = []
+        scaler = GradScaler()
         for data, label in zip(input_tensors, label_tensors):
-            loss = loss_fct(model_a(data), label)
+            with autocast():
+                loss = loss_fct(model_a(data), label)
 
-            loss.backward()  # 反向传播求解梯度
+            scaler.scale(loss).backward()  # 反向传播求解梯度
+            scaler.unscale_(optimizer_a)  # 将优化器中的梯度值反向缩放回原始值
             nn.utils.clip_grad_norm_(model_a.parameters(), gradient_clipping_max_norm)  # 梯度裁剪
-            optimizer_a.step()  # 更新权重参数
+            scaler.step(optimizer_a)  # 更新权重参数
+            scaler.update()
             optimizer_a.zero_grad()  # 梯度清零
 
             scheduler_a.step()  # 更新学习率
@@ -511,7 +516,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
             scheduler=scheduler_b,
             gradient_clipping_max_norm=gradient_clipping_max_norm,
             gradient_accumulation_steps=1,
-            enable_amp=False,
+            enable_amp=True,
             num_training_steps=-1,
         )
         res_b_list = []
