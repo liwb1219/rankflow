@@ -622,7 +622,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
         diff_ratio = diff / len(res_a_list)
 
-        print(f'diff率v2: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
+        print(f'diff率v6: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
         self.assertLessEqual(a=diff_ratio, b=0.1)
 
     # 测试epoch训练(有梯度累积, 能够整除)(amp)
@@ -725,7 +725,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
         diff_ratio = diff / len(res_a_list)
 
-        print(f'diff率v3: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
+        print(f'diff率v7: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
         self.assertLessEqual(a=diff_ratio, b=0.1)
 
     # 测试epoch训练(有梯度累积, 不能整除)(amp)
@@ -828,7 +828,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
         diff_ratio = diff / len(res_a_list)
 
-        print(f'diff率v4: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
+        print(f'diff率v8: {100 * diff_ratio:.3f}% [{diff} / {len(res_a_list)}]')
         self.assertLessEqual(a=diff_ratio, b=0.1)
 
 
