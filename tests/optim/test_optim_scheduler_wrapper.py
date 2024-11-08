@@ -665,15 +665,19 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
 
         res_a_list = []
         steps = 0
+        scaler = GradScaler()
         for epoch in range(max_epochs):
             for data, label in data_loader:
                 steps += 1
-                loss = loss_fct(model_a(data), label)
+                with autocast():
+                    loss = loss_fct(model_a(data), label)
 
-                loss.backward()  # 反向传播求解梯度
+                scaler.scale(loss).backward()  # 反向传播求解梯度
+                scaler.unscale_(optimizer_a)  # 将优化器中的梯度值反向缩放回原始值
                 nn.utils.clip_grad_norm_(model_a.parameters(), gradient_clipping_max_norm)  # 梯度裁剪
                 if steps % gradient_accumulation_steps == 0:
-                    optimizer_a.step()  # 更新权重参数
+                    scaler.step(optimizer_a)  # 更新权重参数
+                    scaler.update()
                     optimizer_a.zero_grad()  # 梯度清零
 
                 scheduler_a.step()  # 更新学习率
@@ -701,7 +705,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
             scheduler=scheduler_b,
             gradient_clipping_max_norm=gradient_clipping_max_norm,
             gradient_accumulation_steps=gradient_accumulation_steps,
-            enable_amp=False,
+            enable_amp=True,
             num_training_steps=num_training_steps,
         )
 
