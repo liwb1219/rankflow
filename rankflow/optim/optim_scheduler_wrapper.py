@@ -121,7 +121,8 @@ class OptimSchedulerWrapper:
 
     def step(self):
         """ 梯度裁剪 & 更新权重参数 """
-        self._clip_grad()
+        if self.gradient_clipping_max_norm is not None:
+            self._clip_grad()
         if self.enable_amp:
             self.scaler.step(self.optimizer)  # 更新权重参数
             self.scaler.update()
@@ -130,20 +131,19 @@ class OptimSchedulerWrapper:
 
     def _clip_grad(self):
         """ 梯度裁剪 """
-        if self.gradient_clipping_max_norm is not None:
-            if self.enable_amp:
-                self.scaler.unscale_(self.optimizer)  # 将优化器中的梯度值反向缩放回原始值(取消缩放)
+        if self.enable_amp:
+            self.scaler.unscale_(self.optimizer)  # 将优化器中的梯度值反向缩放回原始值(取消缩放)
 
-            """
-            遍历所有参数组, 对每个参数组的参数进行裁剪, 不能写成:
+        """
+        遍历所有参数组, 对每个参数组的参数进行裁剪, 不能写成:
+        torch.nn.utils.clip_grad_norm_(
+            self.optimizer.param_groups[0]['params'],
+            self.gradient_clipping_max_norm,
+        )
+        如果优化器的params是以list传入(常见于AdamW优化参数模板), 这么写只会优化第一个元素中的参数
+        """
+        for param_group in self.optimizer.param_groups:
             torch.nn.utils.clip_grad_norm_(
-                self.optimizer.param_groups[0]['params'],
+                param_group['params'],
                 self.gradient_clipping_max_norm,
             )
-            如果优化器的params是以list传入(常见于AdamW优化参数模板), 这么写只会优化第一个元素中的参数
-            """
-            for param_group in self.optimizer.param_groups:
-                torch.nn.utils.clip_grad_norm_(
-                    param_group['params'],
-                    self.gradient_clipping_max_norm,
-                )
