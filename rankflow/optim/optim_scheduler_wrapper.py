@@ -9,20 +9,28 @@ class OptimSchedulerWrapper:
     """
     包装优化器和学习率调度器的类, 支持梯度清零、反向传播、梯度裁剪、梯度累积、权重更新、学习率更新以及混合精度训练等功能
 
-    使用示例:
-    optim_scheduler = OptimSchedulerWrapper(
-        optimizer,
-        scheduler,
-        gradient_clipping_max_norm=1.0,
-        gradient_accumulation_steps=1,
-        enable_amp=True
-    )
+    参数:
+        optimizer: 优化器实例(如 torch.optim.Adam, torch.optim.SGD 等)
+        scheduler: 学习率调度器实例(如 torch.optim.lr_scheduler.StepLR 等)
+        gradient_clipping_max_norm: 梯度裁剪的最大阈值(默认L2范数), 默认值为1.0
+        gradient_accumulation_steps: 梯度累积的步数, 默认为1, 即不进行累计
+        enable_amp: 开启混合精度训练, 默认True
+        num_training_steps: 总共训练步数, 默认为-1, 表示未指定
 
-    for epoch in range(epochs):
-        for data in data_loader:
-            loss = model(**data)['loss']
-            optim_scheduler.update_params(loss)
-            optim_scheduler.update_learning_rate()
+    使用示例:
+        optim_scheduler = OptimSchedulerWrapper(
+            optimizer=optimizer,
+            scheduler=scheduler,
+            gradient_clipping_max_norm=1.0,
+            gradient_accumulation_steps=1,
+            enable_amp=True
+        )
+
+        for epoch in range(epochs):
+            for data in data_loader:
+                loss = model(**data)['loss']
+                optim_scheduler.update_params(loss)
+                optim_scheduler.update_lr()
     """
     def __init__(
         self,
@@ -146,24 +154,3 @@ class OptimSchedulerWrapper:
                     param_group['params'],
                     self.gradient_clipping_max_norm,
                 )
-
-
-if __name__ == '__main__':
-    """
-    model = torch.nn.Linear(1, 1)
-    optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1, gamma=0.9)
-    optim_scheduler = OptimSchedulerWrapper(
-        optimizer,
-        scheduler,
-        gradient_clipping_max_norm=1.0,
-        gradient_accumulation_steps=10,
-        enable_amp=True,
-        num_training_steps=98,
-    )
-    inputs = torch.randn(98, 1)
-    targets = torch.randn(98, 1)
-    for (data, label) in zip(inputs, targets):
-        loss = torch.nn.MSELoss()(model(data), label)
-        optim_scheduler.update_params(loss)
-    """
