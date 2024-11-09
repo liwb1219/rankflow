@@ -41,14 +41,6 @@ class OptimSchedulerWrapper:
         enable_amp: bool = True,
         num_training_steps: int = -1,
     ):
-        """
-        :param optimizer: 优化器实例(如 torch.optim.Adam, torch.optim.SGD 等)
-        :param scheduler: 学习率调度器实例(如 torch.optim.lr_scheduler.StepLR 等)
-        :param gradient_clipping_max_norm: 梯度裁剪的最大阈值(默认L2范数), 默认值为1.0
-        :param gradient_accumulation_steps: 梯度累积的步数, 默认为1, 即不进行累计
-        :param enable_amp: 开启混合精度训练, 默认True
-        :param num_training_steps: 总共训练步数, 默认为-1, 表示未指定
-        """
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.gradient_clipping_max_norm = gradient_clipping_max_norm
