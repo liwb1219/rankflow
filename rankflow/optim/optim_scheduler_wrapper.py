@@ -123,6 +123,7 @@ class OptimSchedulerWrapper:
         """ 梯度裁剪 & 更新权重参数 """
         if self.gradient_clipping_max_norm is not None:
             self._clip_grad()
+
         if self.enable_amp:
             self.scaler.step(self.optimizer)  # 更新权重参数
             self.scaler.update()
