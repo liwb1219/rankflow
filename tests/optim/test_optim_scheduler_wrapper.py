@@ -136,7 +136,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
             res_a_list.append(
                 (
                     loss.item(),
-                    scheduler_a.get_lr(),
+                    scheduler_a.get_last_lr(),
                     [param.cpu().tolist() for param in model_a.parameters()],
                 )
             )
@@ -161,7 +161,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
             res_b_list.append(
                 (
                     loss.item(),
-                    optim_scheduler_b.get_lr(),
+                    optim_scheduler_b.get_last_lr(),
                     [param.cpu().tolist() for param in model_b.parameters()],
                 )
             )
@@ -211,7 +211,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 res_a_list.append(
                     [
                         loss.item(),
-                        scheduler_a.get_lr(),
+                        scheduler_a.get_last_lr(),
                         [param.cpu().tolist() for param in model_a.parameters()],
                     ]
                 )
@@ -241,7 +241,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 res_b_list.append(
                     [
                         loss.item(),
-                        optim_scheduler_b.get_lr(),
+                        optim_scheduler_b.get_last_lr(),
                         [param.cpu().tolist() for param in model_b.parameters()],
                     ]
                 )
@@ -309,7 +309,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 res_a_list.append(
                     [
                         loss.item(),
-                        scheduler_a.get_lr(),
+                        scheduler_a.get_last_lr(),
                         [param.cpu().tolist() for param in model_a.parameters()],
                     ]
                 )
@@ -344,7 +344,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 res_b_list.append(
                     [
                         loss.item(),
-                        optim_scheduler_b.get_lr(),
+                        optim_scheduler_b.get_last_lr(),
                         [param.cpu().tolist() for param in model_b.parameters()],
                     ]
                 )
@@ -412,7 +412,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 res_a_list.append(
                     [
                         loss.item(),
-                        scheduler_a.get_lr(),
+                        scheduler_a.get_last_lr(),
                         [param.cpu().tolist() for param in model_a.parameters()],
                     ]
                 )
@@ -447,7 +447,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 res_b_list.append(
                     [
                         loss.item(),
-                        optim_scheduler_b.get_lr(),
+                        optim_scheduler_b.get_last_lr(),
                         [param.cpu().tolist() for param in model_b.parameters()],
                     ]
                 )
@@ -504,7 +504,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
             res_a_list.append(
                 (
                     loss.item(),
-                    scheduler_a.get_lr(),
+                    scheduler_a.get_last_lr(),
                     [param.cpu().tolist() for param in model_a.parameters()],
                 )
             )
@@ -529,7 +529,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
             res_b_list.append(
                 (
                     loss.item(),
-                    optim_scheduler_b.get_lr(),
+                    optim_scheduler_b.get_last_lr(),
                     [param.cpu().tolist() for param in model_b.parameters()],
                 )
             )
@@ -583,7 +583,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 res_a_list.append(
                     [
                         loss.item(),
-                        scheduler_a.get_lr(),
+                        scheduler_a.get_last_lr(),
                         [param.cpu().tolist() for param in model_a.parameters()],
                     ]
                 )
@@ -613,7 +613,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 res_b_list.append(
                     [
                         loss.item(),
-                        optim_scheduler_b.get_lr(),
+                        optim_scheduler_b.get_last_lr(),
                         [param.cpu().tolist() for param in model_b.parameters()],
                     ]
                 )
@@ -685,7 +685,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 res_a_list.append(
                     [
                         loss.item(),
-                        scheduler_a.get_lr(),
+                        scheduler_a.get_last_lr(),
                         [param.cpu().tolist() for param in model_a.parameters()],
                     ]
                 )
@@ -720,7 +720,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 res_b_list.append(
                     [
                         loss.item(),
-                        optim_scheduler_b.get_lr(),
+                        optim_scheduler_b.get_last_lr(),
                         [param.cpu().tolist() for param in model_b.parameters()],
                     ]
                 )
@@ -792,7 +792,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 res_a_list.append(
                     [
                         loss.item(),
-                        scheduler_a.get_lr(),
+                        scheduler_a.get_last_lr(),
                         [param.cpu().tolist() for param in model_a.parameters()],
                     ]
                 )
@@ -827,7 +827,7 @@ class TestOptimSchedulerWrapper(unittest.TestCase):
                 res_b_list.append(
                     [
                         loss.item(),
-                        optim_scheduler_b.get_lr(),
+                        optim_scheduler_b.get_last_lr(),
                         [param.cpu().tolist() for param in model_b.parameters()],
                     ]
                 )
