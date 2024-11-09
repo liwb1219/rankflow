@@ -35,20 +35,19 @@ class Trainer:
         log_file_mode: Optional[str] = None,
         enable_highlight_colors: bool = False,
 
-        enable_training: bool = True,
-        enable_ddp: Optional[bool] = True,
+        enable_ddp: bool = True,
         max_iters: Optional[int] = None,
         max_epochs: Optional[int] = None,
         save_steps: Optional[int] = 1,
         logging_steps: Optional[int] = 1,
         warmup_steps: Optional[int] = None,
         warmup_ratio: Optional[float] = None,
-        learning_rate: Optional[float] = 3e-5,
-        weight_decay: Optional[float] = 1e-2,
-        adam_epsilon: Optional[float] = 1e-5,
-        scheduler_type: Optional[str] = 'linear',
+        learning_rate: float = 3e-5,
+        weight_decay: float = 1e-2,
+        adam_epsilon: float = 1e-5,
+        scheduler_type: str = 'linear',
         gradient_clipping_max_norm: Optional[float] = 1.0,
-        gradient_accumulation_steps: Optional[int] = 1,
+        gradient_accumulation_steps: int = 1,
     ):
         self._hooks: List[HookBase] = []
         self.model = model
@@ -65,45 +64,31 @@ class Trainer:
             enable_highlight_colors=enable_highlight_colors,
         )
 
-        if enable_training:
-            self._enable_ddp = enable_ddp
-            self._max_iters = max_iters
-            self._max_epochs = max_epochs
-            self._save_steps = save_steps
-            self._logging_steps = logging_steps
+        self._enable_ddp = enable_ddp
+        self._max_iters = max_iters
+        self._max_epochs = max_epochs
+        self._save_steps = save_steps
+        self._logging_steps = logging_steps
 
-            optimizer, scheduler, num_training_steps = self.build_optimizer_and_scheduler(
-                model=model,
-                warmup_steps=warmup_steps,
-                warmup_ratio=warmup_ratio,
-                learning_rate=learning_rate,
-                weight_decay=weight_decay,
-                adam_epsilon=adam_epsilon,
-                scheduler_type=scheduler_type,
-            )
+        optimizer, scheduler, num_training_steps = self.build_optimizer_and_scheduler(
+            model=model,
+            warmup_steps=warmup_steps,
+            warmup_ratio=warmup_ratio,
+            learning_rate=learning_rate,
+            weight_decay=weight_decay,
+            adam_epsilon=adam_epsilon,
+            scheduler_type=scheduler_type,
+        )
 
-            self.optim_scheduler = OptimSchedulerWrapper(
-                optimizer=optimizer,
-                scheduler=scheduler,
-                gradient_clipping_max_norm=gradient_clipping_max_norm,
-                gradient_accumulation_steps=gradient_accumulation_steps,
-                enable_amp=enable_amp,
-                num_training_steps=num_training_steps,
-            )
-        else:
-            enable_ddp = None
-            max_iters = None
-            max_epochs = None
-            save_steps = None
-            logging_steps = None
-            warmup_steps = None
-            warmup_ratio = None
-            learning_rate = None
-            weight_decay = None
-            adam_epsilon = None
-            scheduler_type = None
-            gradient_clipping_max_norm = None
-            gradient_accumulation_steps = None
+        self.optim_scheduler = OptimSchedulerWrapper(
+            optimizer=optimizer,
+            scheduler=scheduler,
+            gradient_clipping_max_norm=gradient_clipping_max_norm,
+            gradient_accumulation_steps=gradient_accumulation_steps,
+            enable_amp=enable_amp,
+            num_training_steps=num_training_steps,
+        )
+
 
     @property
     def work_dir(self):
