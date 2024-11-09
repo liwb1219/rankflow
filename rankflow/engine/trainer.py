@@ -29,9 +29,8 @@ class Trainer:
 
         train_dataloader: Optional[Union[DataLoader, List]] = None,
         valid_dataloader: Optional[Union[DataLoader, List]] = None,
-        infer_dataloader: Optional[Union[DataLoader, List]] = None,
 
-        log_level: str = 'DEBUG',
+        log_level: Union[int, str] = 'DEBUG',
         log_file: Optional[str] = None,
         log_file_mode: Optional[str] = None,
         enable_highlight_colors: bool = False,
@@ -58,7 +57,6 @@ class Trainer:
 
         self.train_dataloader = train_dataloader
         self.valid_dataloader = valid_dataloader
-        self.infer_dataloader = infer_dataloader
 
         self.logger = setup_logger(
             log_level=log_level,
