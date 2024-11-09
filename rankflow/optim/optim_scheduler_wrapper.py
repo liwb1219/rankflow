@@ -85,9 +85,9 @@ class OptimSchedulerWrapper:
         """ 更新learning rate """
         self.scheduler.step()
 
-    def get_lr(self):
+    def get_last_lr(self):
         """ 获取learning rate """
-        return self.scheduler.get_lr()
+        return self.scheduler.get_last_lr()
 
     def should_update_params(self) -> bool:
         """ 判断是否需要更新参数 """
