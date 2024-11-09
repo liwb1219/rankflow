@@ -263,5 +263,5 @@ class Trainer:
 
 
 if __name__ == '__main__':
-    trainer = Trainer(model=nn.Linear(3, 3), enable_training=False)
+    trainer = Trainer(model=nn.Linear(3, 3))
     pass
