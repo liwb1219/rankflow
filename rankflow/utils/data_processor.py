@@ -23,25 +23,15 @@ class DataProcessor(ABC):
     def process_data(self):
         pass
 
-    @abstractmethod
-    def format_output(self, processed_data: Any) -> Any:
-        """
-        抽象方法：将加工后的数据转换为指定格式
-        :param processed_data: 加工后的数据
-        :return: 格式化后的数据
-        """
+    def transform_data(self):
         pass
 
-    def run(self) -> Any:
+    def run(self):
         """
         运行数据处理流程
         :return: 最终的输出结果
         """
 
-    @abstractmethod
-    def format_data(self, data: pd.DataFrame, output_format: str) -> Union[str, dict, pd.DataFrame]:
-        """ 返回指定格式的数据 """
-        pass
 
 if __name__ == '__main__':
     processor = DataProcessor()
