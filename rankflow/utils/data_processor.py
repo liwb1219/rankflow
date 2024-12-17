@@ -77,42 +77,6 @@ class DataProcessor(ABC):
             yield data
 
 
-class DataProcessor1(ABC):
-    def run(self, file_path: Union[str, Path]) -> Union[List[Any], Generator[Any, None, None]]:
-        if self.mode == 'batch':
-            return self._run_batch(file_path)
-        elif self.mode == 'stream':
-            return self._run_stream(file_path)
-        else:
-            raise RuntimeError(f"Invalid mode: {self.mode}")
-
-    def _run_batch(self, file_path: Union[str, Path]) -> List[Any]:
-        """
-        批处理模式：一次性读取所有数据并处理。
-
-        :param file_path: 文件路径。
-        :return: 返回处理后的数据列表。
-        """
-        data_list = []
-        for data in self.read_data(file_path):
-            processed_data = self.process_data(data)
-            transformed_data = self.transform_data(processed_data)
-            data_list.append(transformed_data)
-        return data_list
-
-    def _run_stream(self, file_path: Union[str, Path]) -> Generator[Any, None, None]:
-        """
-        流处理模式：逐条读取数据并处理。
-
-        :param file_path: 文件路径。
-        :return: 返回处理后的数据生成器。
-        """
-        for data in self.read_data(file_path):
-            processed_data = self.process_data(data)
-            transformed_data = self.transform_data(processed_data)
-            yield transformed_data
-
-
 class MyDataProcessor(DataProcessor):
     def process_data(self, data: Any) -> Any:
         return data
