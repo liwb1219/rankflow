@@ -2,7 +2,7 @@
 # Copyright (c) 2024 liwenbiao. All rights reserved.
 
 from abc import ABC, abstractmethod
-from typing import Literal, Union, Generator
+from typing import Literal, Union, Generator, Any
 from pathlib import Path
 
 
@@ -43,9 +43,38 @@ class DataProcessor(ABC):
                 yield line
 
     @abstractmethod
-    def process_data(self):
-        """ 加工数据的抽象方法, 这里指对原始数据进行初步加工"""
+    def process_data(self, data: Any) -> Any:
+        """ 加工数据的抽象方法, 这里指对原始数据进行初步加工, 每个子类应该覆盖此方法来定义具体的加工逻辑 """
         pass
+
+    @abstractmethod
+    def process_data(self, data: Any) -> Any:
+        """
+        加工数据的抽象方法，对原始数据进行初步加工。
+
+        每个子类应该覆盖此方法来定义具体的加工逻辑。
+
+        :param data: 原始数据项，类型可以是任意类型（如字符串、列表、字典等）。
+        :return: 加工后的数据项，类型可以是任意类型（如字符串、列表、字典等）。
+        """
+        pass
+
+    @abstractmethod
+    def process_data(self, data: Any) -> Any:
+        """
+        加工数据的抽象方法，用于对原始数据进行初步加工或转换。
+
+        子类必须覆盖此方法，并根据具体需求定义如何处理传入的数据。
+        例如，可以在这里清洗数据、解析格式、提取特征等。
+
+        :param data: 要加工的数据。数据的具体类型取决于应用上下文和数据来源。
+                     在批处理模式下，这可能是从文件读取的一行或多行文本；
+                     在流处理模式下，这可能是实时接收到的数据块。
+        :return: 无返回值 (None)
+        """
+        pass
+
+
 
     def transform_data(self):
         """ 转换数据的抽象方法, 用于进一步转换加工后的数据 """
@@ -62,12 +91,6 @@ class DataProcessor(ABC):
 
 
 class DataProcessor1(ABC):
-    @abstractmethod
-    def process_data(self) -> None:
-        """
-        加工数据的抽象方法，这里指对原始数据进行初步加工。每个子类应该覆盖此方法来定义具体的加工逻辑。
-        """
-
     @abstractmethod
     def transform_data(self) -> None:
         """
@@ -103,16 +126,6 @@ class DataProcessor1(ABC):
 
 
 class DataProcessor2(ABC):
-    @abstractmethod
-    def process_data(self, data: Any) -> Any:
-        """
-        加工数据的抽象方法，对原始数据进行初步加工。
-
-        :param data: 原始数据项。
-        :return: 加工后的数据项。
-        """
-        pass
-
     @abstractmethod
     def transform_data(self, processed_data: Any) -> Any:
         """
