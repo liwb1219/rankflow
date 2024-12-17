@@ -74,7 +74,16 @@ class DataProcessor(ABC):
             data = self.transform_data(data)
             yield data
 
+
+class MyDataProcessor(DataProcessor):
+    def process_data(self, data: Any) -> Any:
+        return data
+
+    def transform_data(self, data: Any) -> Any:
+        return data
+
+
 if __name__ == '__main__':
-    processor = DataProcessor()
-
-
+    processor = MyDataProcessor('stream')
+    for i in processor.run('LiCENSE'):
+        print(i)
