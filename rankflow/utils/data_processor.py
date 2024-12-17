@@ -58,7 +58,9 @@ class DataProcessor(ABC):
         elif self.mode == 'stream':
             return self._run_stream(file_path)
         else:
-            raise RuntimeError
+            raise RuntimeError(
+                f'Invalid mode: {self.mode}. Please choose from {["batch", "stream"]}'
+            )
 
     def _run_batch(self, file_path: Union[str, Path]) -> List[Any]:
         data_list = []
