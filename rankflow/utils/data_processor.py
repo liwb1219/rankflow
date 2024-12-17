@@ -42,24 +42,6 @@ class DataProcessor(ABC):
             for line in file:
                 yield line
 
-
-    @abstractmethod
-    def read_data(self) -> None:
-        """
-        读取数据的抽象方法，具体实现取决于数据来源。每个子类应该覆盖此方法来定义如何读取数据。
-        """
-
-    @abstractmethod
-    def read_data(self) -> Iterable[Any]:
-        """
-        读取数据的抽象方法，具体实现取决于数据来源。
-
-        :return: 返回一个可迭代对象，表示读取的数据。
-        """
-        pass
-
-
-
     @abstractmethod
     def process_data(self):
         """ 加工数据的抽象方法, 这里指对原始数据进行初步加工"""
