@@ -2,7 +2,8 @@
 # Copyright (c) 2024 liwenbiao. All rights reserved.
 
 from abc import ABC, abstractmethod
-from typing import Literal
+from typing import Literal, Union
+from pathlib import Path
 
 
 class DataProcessor(ABC):
@@ -28,9 +29,39 @@ class DataProcessor(ABC):
         self.mode = mode
         self.encoding = encoding
 
-    def read_data(self):
-        """ 读取数据的抽象方法, 具体实现取决于数据来源 """
+    def read_data(self, file_path: Union[str, Path]):
+        """ 读取数据的方法, 具体实现取决于数据来源, 默认按行读取 """
+        # 检查路径合法性
+        path = Path(file_path)
+        if not path.exists() or not path.is_file():
+            file_path = f'\033[1;32m{file_path}\033[0m'  # 绿色加粗
+            raise FileNotFoundError(
+                f'\033[1;31mNo such file or directory: {file_path}\033[0m'
+            )
+        with open(file_path, 'r', encoding=self.encoding) as file:
+            for line in file:
+                yield line
+        with open(file_path, 'r', encoding=self.encoding) as file:
+            for line in file:
+                yield line
+
+
+    @abstractmethod
+    def read_data(self) -> None:
+        """
+        读取数据的抽象方法，具体实现取决于数据来源。每个子类应该覆盖此方法来定义如何读取数据。
+        """
+
+    @abstractmethod
+    def read_data(self) -> Iterable[Any]:
+        """
+        读取数据的抽象方法，具体实现取决于数据来源。
+
+        :return: 返回一个可迭代对象，表示读取的数据。
+        """
         pass
+
+
 
     @abstractmethod
     def process_data(self):
@@ -51,25 +82,7 @@ class DataProcessor(ABC):
         pass
 
 
-class DataProcessor(ABC):
-
-    def __init__(self, mode: Literal['batch', 'stream'] = 'batch', encoding: str = 'utf-8'):
-
-        if mode not in {'batch', 'stream'}:
-            str_b = f"\033[1;33mbatch\033[0m"  # 黄色加粗
-            str_s = f"\033[1;33mstream\033[0m"  # 黄色加粗
-            raise ValueError(
-                f"\033[1;31mThe mode parameter must be either {str_b} \033[1;31mor {str_s}\033[0m"
-            )
-        self.mode = mode
-        self.encoding = encoding
-
-    @abstractmethod
-    def read_data(self) -> None:
-        """
-        读取数据的抽象方法，具体实现取决于数据来源。每个子类应该覆盖此方法来定义如何读取数据。
-        """
-
+class DataProcessor1(ABC):
     @abstractmethod
     def process_data(self) -> None:
         """
@@ -110,34 +123,7 @@ class DataProcessor(ABC):
         pass
 
 
-class DataProcessor(ABC):
-
-
-    def __init__(self, mode: Literal['batch', 'stream'] = 'batch', encoding: str = 'utf-8'):
-        """
-        初始化 DataProcessor 类。
-
-        :param mode: 处理模式，可选值为 'batch' 或 'stream'。
-        :param encoding: 文件编码，默认为 'utf-8'。
-        """
-        if mode not in {'batch', 'stream'}:
-            str_b = f"\033[1;33mbatch\033[0m"   # 黄色加粗
-            str_s = f"\033[1;33mstream\033[0m"  # 黄色加粗
-            raise ValueError(
-                f"\033[1;31mThe mode parameter must be either {str_b} \033[1;31mor {str_s}\033[0m"
-            )
-        self.mode: Literal['batch', 'stream'] = mode
-        self.encoding: str = encoding
-
-    @abstractmethod
-    def read_data(self) -> Iterable[Any]:
-        """
-        读取数据的抽象方法，具体实现取决于数据来源。
-
-        :return: 返回一个可迭代对象，表示读取的数据。
-        """
-        pass
-
+class DataProcessor2(ABC):
     @abstractmethod
     def process_data(self, data: Any) -> Any:
         """
