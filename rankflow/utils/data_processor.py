@@ -2,7 +2,7 @@
 # Copyright (c) 2024 liwenbiao. All rights reserved.
 
 from abc import ABC, abstractmethod
-from typing import Literal, Union, Generator, Any
+from typing import Literal, Union, Generator, Any, List
 from pathlib import Path
 
 
