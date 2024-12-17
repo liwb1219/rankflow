@@ -2,7 +2,7 @@
 # Copyright (c) 2024 liwenbiao. All rights reserved.
 
 from abc import ABC, abstractmethod
-from typing import Literal, Union
+from typing import Literal, Union, Generator
 from pathlib import Path
 
 
@@ -29,7 +29,7 @@ class DataProcessor(ABC):
         self.mode = mode
         self.encoding = encoding
 
-    def read_data(self, file_path: Union[str, Path]):
+    def read_data(self, file_path: Union[str, Path]) -> Generator[str, None, None]:
         """ 读取数据的方法, 具体实现取决于数据来源, 默认按行读取 """
         # 检查路径合法性
         path = Path(file_path)
@@ -38,9 +38,6 @@ class DataProcessor(ABC):
             raise FileNotFoundError(
                 f'\033[1;31mNo such file or directory: {file_path}\033[0m'
             )
-        with open(file_path, 'r', encoding=self.encoding) as file:
-            for line in file:
-                yield line
         with open(file_path, 'r', encoding=self.encoding) as file:
             for line in file:
                 yield line
