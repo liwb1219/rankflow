@@ -47,8 +47,9 @@ class DataProcessor(ABC):
         """ 加工数据的抽象方法, 用于对原始数据进行初步加工, 每个子类必须覆盖此方法来定义具体的加工逻辑 """
         pass
 
-    def transform_data(self):
-        """ 转换数据的抽象方法, 用于进一步转换加工后的数据 """
+    @abstractmethod
+    def transform_data(self, data: Any) -> Any:
+        """ 转换数据的抽象方法, 用于进一步转换加工后的数据, 每个子类必须覆盖此方法来定义具体的转换逻辑 """
         pass
 
     def run(self):
@@ -62,12 +63,6 @@ class DataProcessor(ABC):
 
 
 class DataProcessor1(ABC):
-    @abstractmethod
-    def transform_data(self) -> None:
-        """
-        转换数据的抽象方法，用于进一步转换加工后的数据。每个子类应该覆盖此方法来定义具体的数据转换逻辑。
-        """
-
     def run(self) -> None:
         """
         运行整个数据处理流程。依据实例化的模式（批处理或流处理）选择运行的方式。
