@@ -91,17 +91,3 @@ class DataProcessor(ABC):
             data = self.process_data(data)
             data = self.transform_data(data)
             yield data
-
-
-class MyDataProcessor(DataProcessor):
-    def process_data(self, data: Any) -> Any:
-        return data
-
-    def transform_data(self, data: Any) -> Any:
-        return data
-
-
-if __name__ == '__main__':
-    processor = MyDataProcessor('stream')
-    for i in processor.run('LiCENSE', mode='batch'):
-        print(i)
