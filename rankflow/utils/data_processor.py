@@ -96,5 +96,5 @@ class MyDataProcessor(DataProcessor):
 
 if __name__ == '__main__':
     processor = MyDataProcessor('stream')
-    for i in processor.run('LiCENSE', mode='train'):
+    for i in processor.run('LiCENSE', mode='batch'):
         print(i)
