@@ -2,7 +2,7 @@
 # Copyright (c) 2024 liwenbiao. All rights reserved.
 
 from abc import ABC, abstractmethod
-from typing import Literal, Union, Generator, Any, List
+from typing import Literal, Union, Generator, Any, List, Optional
 from pathlib import Path
 
 
@@ -21,10 +21,10 @@ class DataProcessor(ABC):
     """
     def __init__(self, mode: Literal['batch', 'stream'] = 'batch', encoding: str = 'utf-8'):
         if mode not in {'batch', 'stream'}:
-            str_b = f"\033[1;33mbatch\033[0m"   # 黄色加粗
-            str_s = f"\033[1;33mstream\033[0m"  # 黄色加粗
+            str_b = f'\033[1;33mbatch\033[0m'   # 黄色加粗
+            str_s = f'\033[1;33mstream\033[0m'  # 黄色加粗
             raise ValueError(
-                f"\033[1;31mThe mode parameter must be either {str_b} \033[1;31mor {str_s}\033[0m"
+                f'\033[1;31mThe mode parameter must be either {str_b} \033[1;31mor {str_s}\033[0m'
             )
         self.mode = mode
         self.encoding = encoding
@@ -52,14 +52,23 @@ class DataProcessor(ABC):
         """ 转换数据的抽象方法, 用于进一步转换加工后的数据, 每个子类必须覆盖此方法来定义具体的转换逻辑 """
         pass
 
-    def run(self, file_path: Union[str, Path]) -> Union[List[Any], Generator[Any, None, None]]:
+    def run(
+        self,
+        file_path: Union[str, Path],
+        mode: Optional[Literal['batch', 'stream']] = None,
+        encoding: Optional[str] = None,
+    ) -> Union[List[Any], Generator[Any, None, None]]:
+        self.mode = mode if mode is not None else self.mode
+        self.encoding = encoding if encoding is not None else self.encoding
+
         if self.mode == 'batch':
             return self._run_batch(file_path)
         elif self.mode == 'stream':
             return self._run_stream(file_path)
         else:
             raise RuntimeError(
-                f'Invalid mode: {self.mode}. Please choose from {["batch", "stream"]}'
+                f'\033[1;31mInvalid mode: \033[1;33m{self.mode}\033[1;31m. '
+                f'Please choose from \033[1;33m{['batch', 'stream']}\033[0m'
             )
 
     def _run_batch(self, file_path: Union[str, Path]) -> List[Any]:
@@ -87,5 +96,5 @@ class MyDataProcessor(DataProcessor):
 
 if __name__ == '__main__':
     processor = MyDataProcessor('stream')
-    for i in processor.run('LiCENSE'):
+    for i in processor.run('LiCENSE', mode='train'):
         print(i)
