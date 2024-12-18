@@ -58,6 +58,13 @@ class DataProcessor(ABC):
         mode: Optional[Literal['batch', 'stream']] = None,
         encoding: Optional[str] = None,
     ) -> Union[List[Any], Generator[Any, None, None]]:
+        """
+        根据处理模式选择运行批处理或流处理, 并允许覆盖默认处理模式和文件编码
+        :param file_path: 文件路径
+        :param mode: 处理模式, 可选值为 'batch' 或 'stream', 如果为 None, 则使用类的默认处理模式
+        :param encoding: 文件编码, 如果为 None, 则使用类的默认文件编码
+        :return: 返回处理后的数据, 批处理模式返回列表, 流处理模式返回生成器
+        """
         self.mode = mode if mode is not None else self.mode
         self.encoding = encoding if encoding is not None else self.encoding
 
