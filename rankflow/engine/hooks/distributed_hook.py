@@ -27,13 +27,6 @@ class DistributedHook(HookBase):
             find_unused_parameters=self.trainer.find_unused_parameters,
         )
 
-        self.trainer.model = DDP(
-            self.trainer.model.to(local_rank),
-            device_ids=[local_rank],
-            output_device=local_rank,
-            find_unused_parameters=self.trainer.find_unused_parameters,
-        )
-
     @staticmethod
     def init_distributed_environment(backend: str = 'nccl', init_method: str = 'env://') -> Tuple[int, int, int]:
         """
