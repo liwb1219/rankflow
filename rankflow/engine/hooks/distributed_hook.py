@@ -27,6 +27,10 @@ class DistributedHook(HookBase):
             find_unused_parameters=self.trainer.find_unused_parameters,
         )
 
+    def before_epoch(self):
+        if hasattr(self.trainer.train_dataloader.sampler, 'set_epoch'):
+            self.trainer.train_dataloader.sampler.set_epoch(self.trainer.epoch)
+
     @staticmethod
     def init_distributed_environment(backend: str = 'nccl', init_method: str = 'env://') -> Tuple[int, int, int]:
         """
