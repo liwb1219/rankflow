@@ -6,6 +6,7 @@ from .priority import HookPriority
 from typing import Tuple
 import torch.distributed as dist
 import os
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 
 class DistributedHook(HookBase):
@@ -18,8 +19,16 @@ class DistributedHook(HookBase):
         self.trainer.rank = rank
         self.trainer.world_size = world_size
 
+        # 将模型包装为DistributedDataParallel(DDP)模型以实现分布式训练
+        self.trainer.model = DDP(
+            self.trainer.model.to(self.trainer.local_rank),
+            device_ids=[self.trainer.local_rank],
+            output_device=self.trainer.local_rank,
+            find_unused_parameters=self.trainer.find_unused_parameters,
+        )
 
-
+        model = DDP(model.to(local_rank), device_ids=[local_rank], output_device=local_rank,
+                    find_unused_parameters=False)
 
     @staticmethod
     def init_distributed_environment(backend: str = 'nccl', init_method: str = 'env://') -> Tuple[int, int, int]:
