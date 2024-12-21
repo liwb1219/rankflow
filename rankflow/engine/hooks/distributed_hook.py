@@ -33,14 +33,6 @@ class DistributedHook(HookBase):
         elif hasattr(self.trainer.train_dataloader.batch_sampler.sampler, 'set_epoch'):
             self.trainer.train_dataloader.batch_sampler.sampler.set_epoch(self.trainer.epoch)
 
-
-    def before_epoch(self) -> None:
-        if hasattr(self.trainer.train_dataloader.sampler, 'set_epoch'):
-            self.trainer.train_dataloader.sampler.set_epoch(self.trainer.epoch)
-        elif hasattr(self.trainer.train_dataloader.batch_sampler.sampler, 'set_epoch'):
-            self.trainer.train_dataloader.batch_sampler.sampler.set_epoch(self.trainer.epoch)
-
-
     @staticmethod
     def init_distributed_environment(backend: str = 'nccl', init_method: str = 'env://') -> Tuple[int, int, int]:
         """
