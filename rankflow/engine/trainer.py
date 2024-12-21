@@ -72,7 +72,7 @@ class Trainer:
         self._max_iters = max_iters
         self._max_epochs = max_epochs
         self._epoch = 0  # 当前训练轮次
-        self._step = 0  # 当前训练步数
+        self._step = 0   # 当前训练步数
         self._save_steps = save_steps
         self._logging_steps = logging_steps
 
