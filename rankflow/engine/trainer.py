@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2024 liwenbiao. All rights reserved.
 
-import os
 from typing import Union, Optional, List, Dict, Tuple, Literal
 import torch
 import torch.nn as nn
-import torch.distributed as dist
 from torch.utils.data import DataLoader
 from torch.cuda.amp import autocast
 from transformers import get_scheduler
@@ -50,6 +48,10 @@ class Trainer:
         gradient_accumulation_steps: int = 1,
     ):
         self._hooks: List[HookBase] = []
+        self._local_rank = None
+        self._rank = None
+        self._world_size = None
+
         self.model = model
         self._work_dir = work_dir
         self._enable_amp = enable_amp
@@ -89,6 +91,13 @@ class Trainer:
             num_training_steps=num_training_steps,
         )
 
+    @property
+    def local_rank(self):
+        return self._local_rank
+
+    @local_rank.setter
+    def local_rank(self, value):
+        self._local_rank = value
 
     @property
     def work_dir(self):
@@ -236,30 +245,6 @@ class Trainer:
             num_training_steps=num_training_steps,
         )
         return optimizer, scheduler
-
-    @staticmethod
-    def init_distributed_environment(
-        backend: str = 'nccl',
-        init_method: str = 'env://',
-    ) -> Tuple[int, int, int]:
-        """
-        :param backend: 分布式后端, GPU的分布式训练用NCCL
-        :param init_method: 初始化方法, 默认为'env://', 表示使用环境变量进行初始化, 可以从环境变量中读取分布式的信息(os.environ)
-        :return: local_rank(当前进程的本地rank), rank(当前进程的全局rank), world_size(总的进程数)
-        """
-        try:
-            dist.init_process_group(backend=backend, init_method=init_method)
-            local_rank = int(os.environ['LOCAL_RANK'])
-            rank = dist.get_rank()
-            world_size = dist.get_world_size()
-            print(f'\033[1;32mInitialized distributed environment with '
-                  f'\033[1;36mLOCAL_RANK {local_rank}, RANK {rank}, WORLD_SIZE {world_size}\033[0m')
-            return local_rank, rank, world_size
-        except Exception as e:
-            raise RuntimeError(
-                f'\033[1;33mPlease use \033[1;32mtorchrun \033[1;33mto launch the script. '
-                f'{e}\033[0m'
-            )
 
 
 if __name__ == '__main__':
