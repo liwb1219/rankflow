@@ -34,6 +34,7 @@ class Trainer:
         enable_highlight_colors: bool = False,
 
         enable_ddp: bool = True,
+        find_unused_parameters: bool = False,
         max_iters: Optional[int] = None,
         max_epochs: Optional[int] = None,
         save_steps: Optional[int] = 1,
@@ -67,6 +68,7 @@ class Trainer:
         )
 
         self._enable_ddp = enable_ddp
+        self._find_unused_parameters = find_unused_parameters
         self._max_iters = max_iters
         self._max_epochs = max_epochs
         self._save_steps = save_steps
@@ -126,6 +128,10 @@ class Trainer:
     @property
     def enable_ddp(self):
         return self._enable_ddp
+
+    @property
+    def find_unused_parameters(self):
+        return self._find_unused_parameters
 
     @property
     def max_iters(self):
