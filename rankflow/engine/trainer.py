@@ -100,6 +100,22 @@ class Trainer:
         self._local_rank = value
 
     @property
+    def rank(self):
+        return self._rank
+
+    @rank.setter
+    def rank(self, value):
+        self._rank = value
+
+    @property
+    def world_size(self):
+        return self._world_size
+
+    @world_size.setter
+    def world_size(self, value):
+        self._world_size = value
+
+    @property
     def work_dir(self):
         return self._work_dir
 
