@@ -162,15 +162,15 @@ class Trainer:
     def train(self):
         self.call_hooks('before_train')
         for epoch in range(self.max_epochs):
-            self._epoch += 1
             self.train_epoch()
+            self._epoch += 1
         self.call_hooks('after_train')
 
     def train_epoch(self):
         self.call_hooks('before_epoch')
         for data in self.train_dataloader:
-            self._step += 1
             self.train_iter(data)
+            self._step += 1
         self.call_hooks('after_epoch')
 
     def train_iter(self, data):
