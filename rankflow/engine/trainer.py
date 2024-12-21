@@ -71,6 +71,8 @@ class Trainer:
         self._find_unused_parameters = find_unused_parameters
         self._max_iters = max_iters
         self._max_epochs = max_epochs
+        self._epoch = 0  # 当前训练轮次
+        self._step = 0  # 当前训练步数
         self._save_steps = save_steps
         self._logging_steps = logging_steps
 
@@ -140,6 +142,14 @@ class Trainer:
     @property
     def max_epochs(self):
         return self._max_epochs
+
+    @property
+    def epoch(self):
+        return self._epoch
+
+    @property
+    def step(self):
+        return self._step
 
     @property
     def save_steps(self):
