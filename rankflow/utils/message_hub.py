@@ -12,7 +12,6 @@ class MessageHub:
     - 获取信息, 支持指定默认值
     """
     def __init__(self):
-        """ 初始化消息中心, 创建一个空字典 """
         self._storage = {}
 
     def update_info(self, key: str, value: Any) -> None:
