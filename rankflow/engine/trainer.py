@@ -13,6 +13,7 @@ import weakref
 from rankflow.engine.hooks import HookBase
 from rankflow.engine.hooks import HookPriority, get_priority
 from rankflow.utils.logger import setup_logger
+from rankflow.utils.message_hub import MessageHub
 from rankflow.optim import OptimSchedulerWrapper
 
 
@@ -48,6 +49,7 @@ class Trainer:
         gradient_clipping_max_norm: Optional[float] = 1.0,
         gradient_accumulation_steps: int = 1,
     ):
+        self.message_hub = MessageHub()
         self._hooks: List[HookBase] = []
         self._local_rank = None
         self._rank = None
