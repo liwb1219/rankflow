@@ -19,9 +19,3 @@ class MessageHub:
 
     def get_info(self, key: str, default: Optional[Any] = None) -> Any:
         return self._storage.get(key, default)
-
-    def get_info(self, key: str, default: Optional[Any] = None) -> Any:
-        return self._storage.get(key, default)
-
-    def get_info(self, key: str, default: Optional[Any] = None) -> Any:
-        return self._storage.get(key, default)
