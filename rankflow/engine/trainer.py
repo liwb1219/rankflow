@@ -38,8 +38,10 @@ class Trainer:
         find_unused_parameters: bool = False,
         max_iters: Optional[int] = None,
         max_epochs: Optional[int] = None,
-        save_steps: Optional[int] = 1,
-        logging_steps: Optional[int] = 1,
+        save_mode: Literal['epoch', 'step'] = 'epoch',
+        save_interval: int = 1,
+        logging_mode: Literal['epoch', 'step'] = 'epoch',
+        logging_interval: int = 1,
         warmup_steps: Optional[int] = None,
         warmup_ratio: Optional[float] = None,
         learning_rate: float = 3e-5,
@@ -75,8 +77,10 @@ class Trainer:
         self._max_epochs = max_epochs
         self._epoch = 0  # 当前训练轮次
         self._step = 0   # 当前训练步数
-        self._save_steps = save_steps
-        self._logging_steps = logging_steps
+        self._save_mode = save_mode
+        self._save_interval = save_interval
+        self._logging_mode = logging_mode
+        self._logging_interval = logging_interval
 
         optimizer, scheduler, num_training_steps = self.build_optimizer_and_scheduler(
             model=model,
@@ -154,12 +158,20 @@ class Trainer:
         return self._step
 
     @property
-    def save_steps(self):
-        return self._save_steps
+    def save_mode(self):
+        return self._save_mode
 
     @property
-    def logging_steps(self):
-        return self._logging_steps
+    def save_interval(self):
+        return self._save_interval
+
+    @property
+    def logging_mode(self):
+        return self._logging_mode
+
+    @property
+    def logging_interval(self):
+        return self._logging_interval
 
     def train(self):
         self.call_hooks('before_train')
