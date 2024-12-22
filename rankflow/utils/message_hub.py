@@ -3,6 +3,7 @@
 
 from typing import Any, Optional
 
+
 class MessageHub:
     """
     消息中心类, 用于存储和读取信息
