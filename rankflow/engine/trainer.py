@@ -294,6 +294,180 @@ class Trainer:
         )
         return optimizer, scheduler
 
+    def save_checkpoint(self, filename: str) -> None:
+
+
+
+
+        os.makedirs(args.save_dir, exist_ok=True)
+        model_name = '%d' % (epoch + 1) + '_model_' + format(results[args.preferential_metrics], '.3f') + '.bin'
+        model_save_path = os.path.join(args.save_dir, model_name)
+        torch.save(model.module.state_dict(), model_save_path)
+
+        model_name = '%d' % (epoch + 1) + '_model_' + str(steps) + '.bin'
+        model_save_path = os.path.join(args.save_dir, model_name)
+        torch.save(model.module.state_dict(), model_save_path)
+
+
+    def save_checkpoint2(self, file_name: str) -> None:
+        """Save training state: ``epoch``, ``num_gpus``, ``model``, ``optimizer``, ``lr_scheduler``,
+        ``metric_storage``, ``hooks`` (optional), ``grad_scaler`` (optional).
+
+        Args:
+            filename (str): The checkpoint will be saved as ``ckpt_dir/filename``.
+        """
+        data = {
+            "num_gpus": get_world_size(),
+            "model": self.model_or_module.state_dict(),
+            "optimizer": self.optimizer.state_dict(),
+            "lr_scheduler": self.lr_scheduler.state_dict(),
+            "metric_storage": self.metric_storage,
+        }
+        data.update(dict(epoch=self.cur_epoch) if self.train_by_epoch else dict(iter=self.cur_iter))
+        hook_states = {h.class_name: h.state_dict() for h in self._hooks if h.checkpointable}
+        if hook_states:
+            data["hooks"] = hook_states
+        if self._enable_amp:
+            data["grad_scaler"] = self._grad_scaler.state_dict()
+
+        file_path = osp.join(self.ckpt_dir, file_name)
+        logger.info(f"Saving checkpoint to {file_path}")
+        torch.save(data, file_path)
+
+        # tag the latest checkpoint
+        dst_file = osp.join(self.ckpt_dir, "latest.pth")
+        symlink(file_name, dst_file)
+
+    def save_checkpoint1(
+        self,
+        out_dir: str,
+        filename: str,
+        file_client_args: Optional[dict] = None,
+        save_optimizer: bool = True,
+        save_param_scheduler: bool = True,
+        meta: Optional[dict] = None,
+        by_epoch: bool = True,
+        backend_args: Optional[dict] = None,
+    ):
+        """Save checkpoints.
+
+        ``CheckpointHook`` invokes this method to save checkpoints
+        periodically.
+
+        Args:
+            out_dir (str): The directory that checkpoints are saved.
+            filename (str): The checkpoint filename.
+            file_client_args (dict, optional): Arguments to instantiate a
+                FileClient. See :class:`mmengine.fileio.FileClient` for
+                details. Defaults to None. It will be deprecated in future.
+                Please use `backend_args` instead.
+            save_optimizer (bool): Whether to save the optimizer to
+                the checkpoint. Defaults to True.
+            save_param_scheduler (bool): Whether to save the param_scheduler
+                to the checkpoint. Defaults to True.
+            meta (dict, optional): The meta information to be saved in the
+                checkpoint. Defaults to None.
+            by_epoch (bool): Decide the number of epoch or iteration saved in
+                checkpoint. Defaults to True.
+            backend_args (dict, optional): Arguments to instantiate the
+                prefix of uri corresponding backend. Defaults to None.
+                New in v0.2.0.
+        """
+        if meta is None:
+            meta = {}
+        elif not isinstance(meta, dict):
+            raise TypeError(
+                f'meta should be a dict or None, but got {type(meta)}')
+
+        if by_epoch:
+            # self.epoch increments 1 after
+            # `self.call_hook('after_train_epoch)` but `save_checkpoint` is
+            # called by `after_train_epoch`` method of `CheckpointHook` so
+            # `epoch` should be `self.epoch + 1`
+            meta.setdefault('epoch', self.epoch + 1)
+            meta.setdefault('iter', self.iter)
+        else:
+            meta.setdefault('epoch', self.epoch)
+            meta.setdefault('iter', self.iter + 1)
+
+        if file_client_args is not None:
+            warnings.warn(
+                '"file_client_args" will be deprecated in future. '
+                'Please use "backend_args" instead', DeprecationWarning)
+            if backend_args is not None:
+                raise ValueError(
+                    '"file_client_args" and "backend_args" cannot be set at '
+                    'the same time.')
+
+            file_client = FileClient.infer_client(file_client_args, out_dir)
+            filepath = file_client.join_path(out_dir, filename)
+        else:
+            filepath = join_path(  # type: ignore
+                out_dir, filename, backend_args=backend_args)
+
+        meta.update(
+            cfg=self.cfg.pretty_text,
+            seed=self.seed,
+            experiment_name=self.experiment_name,
+            time=time.strftime('%Y%m%d_%H%M%S', time.localtime()),
+            mmengine_version=mmengine.__version__ + get_git_hash())
+
+        if hasattr(self.train_dataloader.dataset, 'metainfo'):
+            meta.update(dataset_meta=self.train_dataloader.dataset.metainfo)
+
+        if is_model_wrapper(self.model):
+            model = self.model.module
+        else:
+            model = self.model
+
+        checkpoint = {
+            'meta':
+            meta,
+            'state_dict':
+            weights_to_cpu(model.state_dict()),
+            'message_hub':
+            apply_to(self.message_hub.state_dict(),
+                     lambda x: hasattr(x, 'cpu'), lambda x: x.cpu()),
+        }
+        # save optimizer state dict to checkpoint
+        if save_optimizer:
+            if isinstance(self.optim_wrapper, OptimWrapper):
+                checkpoint['optimizer'] = apply_to(
+                    self.optim_wrapper.state_dict(),
+                    lambda x: hasattr(x, 'cpu'), lambda x: x.cpu())
+            else:
+                raise TypeError(
+                    'self.optim_wrapper should be an `OptimWrapper` '
+                    'or `OptimWrapperDict` instance, but got '
+                    f'{self.optim_wrapper}')
+
+        # save param scheduler state dict
+        if save_param_scheduler and self.param_schedulers is None:
+            self.logger.warning(
+                '`save_param_scheduler` is True but `self.param_schedulers` '
+                'is None, so skip saving parameter schedulers')
+            save_param_scheduler = False
+        if save_param_scheduler:
+            if isinstance(self.param_schedulers, dict):
+                checkpoint['param_schedulers'] = dict()
+                for name, schedulers in self.param_schedulers.items():
+                    checkpoint['param_schedulers'][name] = []
+                    for scheduler in schedulers:
+                        state_dict = scheduler.state_dict()
+                        checkpoint['param_schedulers'][name].append(state_dict)
+            else:
+                checkpoint['param_schedulers'] = []
+                for scheduler in self.param_schedulers:  # type: ignore
+                    state_dict = scheduler.state_dict()  # type: ignore
+                    checkpoint['param_schedulers'].append(state_dict)
+
+        self.call_hook('before_save_checkpoint', checkpoint=checkpoint)
+        save_checkpoint(
+            checkpoint,
+            filepath,
+            file_client_args=file_client_args,
+            backend_args=backend_args)
+
 
 if __name__ == '__main__':
     trainer = Trainer(model=nn.Linear(3, 3))
