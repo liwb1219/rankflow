@@ -8,8 +8,6 @@ from torch.utils.data import DataLoader
 from torch.cuda.amp import autocast
 from transformers import get_scheduler
 import torch.nn.parallel as parallel
-import os.path as osp
-import os
 from pathlib import Path
 
 import weakref
