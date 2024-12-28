@@ -4,6 +4,7 @@
 from typing import Union, Optional, List, Dict, Tuple, Literal
 import torch
 import torch.nn as nn
+from torch.utils.data import Dataset, IterableDataset
 from torch.utils.data import DataLoader
 from torch.cuda.amp import autocast
 from contextlib import nullcontext
@@ -26,6 +27,11 @@ class Trainer:
         model: nn.Module,
         work_dir: str = 'outputs',
         enable_amp: bool = True,
+
+        train_data_path: Optional[Union[str, Path]] = None,
+        valid_data_path: Optional[Union[str, Path]] = None,
+
+        data_reader: Optional[Union[str, Dataset, IterableDataset]] = None,
 
         batch_size: int = 64,
 
