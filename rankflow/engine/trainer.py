@@ -182,7 +182,6 @@ class Trainer:
         self.call_hooks('before_iter')
         self.model.train()
         batch = self.cast_data(data)
-        # 动态选择上下文管理器
         with autocast() if self.enable_amp else nullcontext():
             outputs = self.model(**batch)
         self.message_hub.update_info('outputs', outputs)
