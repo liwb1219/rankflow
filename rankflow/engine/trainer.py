@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.cuda.amp import autocast
+from contextlib import nullcontext
 from transformers import get_scheduler
 import torch.nn.parallel as parallel
 from pathlib import Path
@@ -180,17 +181,18 @@ class Trainer:
     def train_iter(self, data):
         self.call_hooks('before_iter')
         self.model.train()
-        batch = {k: v for k, v in data.items()}
-
-        if self.enable_amp:
-            with autocast():
-                loss = self.model(**batch)['loss']
-        else:
-            loss = self.model(**batch)['loss']
-
-        self.optim_scheduler.update_params(loss)
+        batch = self.cast_data(data)
+        # 动态选择上下文管理器
+        with autocast() if self.enable_amp else nullcontext():
+            outputs = self.model(**batch)
+        self.message_hub.update_info('outputs', outputs)
+        self.optim_scheduler.update_params(outputs['loss'])
         self.optim_scheduler.update_lr()
         self.call_hooks('after_iter')
+
+    def cast_data(self, data: Dict[str, torch.Tensor]) -> Dict[str, torch.Tensor]:
+        data = {k: v.to(self.local_rank) for k, v in data.items()}
+        return data
 
     def call_hooks(self, fn_name: str) -> None:
         for hook in self._hooks:
