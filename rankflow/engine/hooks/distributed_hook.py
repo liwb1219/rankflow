@@ -15,9 +15,9 @@ class DistributedHook(HookBase):
     def before_train(self):
         local_rank, rank, world_size = self.init_distributed_environment()
         # 使用 property setter 更新 Trainer 的相关属性
-        self.trainer.local_rank = local_rank
-        self.trainer.rank = rank
-        self.trainer.world_size = world_size
+        self.trainer._local_rank = local_rank
+        self.trainer._rank = rank
+        self.trainer._world_size = world_size
 
         # 将模型包装为DistributedDataParallel(DDP)模型以实现分布式训练
         self.trainer.model = DDP(
