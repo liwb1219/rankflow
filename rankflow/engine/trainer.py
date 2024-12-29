@@ -30,7 +30,7 @@ class Trainer:
 
         train_data_path: Optional[Union[str, Path]] = None,
         valid_data_path: Optional[Union[str, Path]] = None,
-
+        data_processor: str = 'BaseDataProcessor',
         data_reader: Optional[Union[str, Dataset, IterableDataset]] = None,
 
         batch_size: int = 64,
