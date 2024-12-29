@@ -16,7 +16,6 @@ import weakref
 
 from rankflow.engine.hooks import HookBase
 from rankflow.engine.hooks import HookPriority, get_priority
-from rankflow.reader.utils import BaseDataProcessor
 from rankflow.utils.logger import setup_logger
 from rankflow.utils.message_hub import MessageHub
 from rankflow.optim import OptimSchedulerWrapper
