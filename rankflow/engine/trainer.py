@@ -68,26 +68,13 @@ class Trainer:
     ):
         self.message_hub = MessageHub()
         self._hooks: List[HookBase] = []
-        self._local_rank = None
-        self._rank = None
-        self._world_size = None
+        self._local_rank = 0
+        self._rank = 0
+        self._world_size = 1
 
         self.model = model
         self._work_dir = work_dir
         self._enable_amp = enable_amp
-
-        if isinstance(train_data_reader, Dataset):
-            data_reader = MapDataReader(train_data_path, train_data_processor)
-        elif isinstance(train_data_reader, IterableDataset):
-            data_reader = IterableDataReader(train_data_path, train_data_processor)
-        elif isinstance(train_data_reader, str):
-            data_reader = getattr(reader, train_data_reader)(train_data_path, train_data_processor)
-        else:
-            raise RuntimeError()
-
-        TrainDataReader = getattr(reader, train_data_reader)
-        if isinstance(train_data_reader, Dataset):
-            train_data_reader = TrainDataReader(train_data_path, train_data_processor)
 
 
 
