@@ -112,7 +112,7 @@ class Trainer:
                 num_workers=1,
                 pin_memory=True,
                 drop_last=False,
-                distributed=enable_ddp,
+                distributed=enable_distributed_evaluation,
             )
         else:
             self.valid_dataloader = None
