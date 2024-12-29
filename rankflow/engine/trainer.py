@@ -413,7 +413,9 @@ class Trainer:
                 drop_last=True,
             )
         else:
-            raise RuntimeError
+            raise ValueError(
+                f'\033[1;33mdataset must be an instance of Dataset or IterableDataset, bug got {type(dataset)}\033[0m'
+            )
         return dataloader
 
 
