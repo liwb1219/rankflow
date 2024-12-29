@@ -43,7 +43,7 @@ class Trainer:
         num_workers: int = 4,
         pin_memory: bool = True,
         drop_last: bool = False,
-        distributed: bool = True,
+        enable_distributed_evaluation: bool = False,
 
         log_level: Union[int, str] = 'DEBUG',
         log_file: Optional[str] = None,
