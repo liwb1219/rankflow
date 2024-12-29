@@ -37,7 +37,6 @@ class IterableDataReader(IterableDataset):
         self.data_path = data_path
         self.rank = rank
         self.world_size = world_size
-        self.train_data_path = None
 
     def __iter__(self):
         worker_info = torch.utils.data.get_worker_info()
