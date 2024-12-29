@@ -325,7 +325,7 @@ class Trainer:
     @staticmethod
     def build_dataset(
         data_reader: Union[str, Dataset, IterableDataset],
-        data_path: Optional[Union[str, Path]] = None,
+        data_path: Union[str, Path],
         data_processor: str = 'BaseDataProcessor',
         rank: int = 0,
         world_size: int = 1,
