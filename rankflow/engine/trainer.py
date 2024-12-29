@@ -11,6 +11,7 @@ from contextlib import nullcontext
 from transformers import get_scheduler
 import torch.nn.parallel as parallel
 from pathlib import Path
+from torch.utils.data.distributed import DistributedSampler
 
 import weakref
 
@@ -19,7 +20,6 @@ from rankflow.engine.hooks import HookPriority, get_priority
 from rankflow.utils.logger import setup_logger
 from rankflow.utils.message_hub import MessageHub
 from rankflow.optim import OptimSchedulerWrapper
-from rankflow import reader
 from rankflow.reader import MapDataReader, IterableDataReader
 
 
@@ -30,11 +30,11 @@ class Trainer:
         work_dir: str = 'outputs',
         enable_amp: bool = True,
 
-        train_data_reader: Optional[Union[str, Dataset, IterableDataset]] = None,
+        train_data_reader: Optional[Literal['MapDataReader', 'IterableDataReader']] = None,
         train_data_path: Optional[Union[str, Path]] = None,
         train_data_processor: str = 'BaseDataProcessor',
 
-        valid_data_reader: Optional[Union[str, Dataset, IterableDataset]] = None,
+        valid_data_reader: Optional[Literal['MapDataReader', 'IterableDataReader']] = None,
         valid_data_path: Optional[Union[str, Path]] = None,
         valid_data_processor: str = 'BaseDataProcessor',
 
@@ -75,7 +75,13 @@ class Trainer:
         self._work_dir = work_dir
         self._enable_amp = enable_amp
 
-
+        train_dataset = self.build_dataset(
+            data_reader=train_data_reader,
+            data_path=train_data_path,
+            data_processor=train_data_processor,
+            rank=self._rank,
+            world_size=self._world_size,
+        )
 
 
 
@@ -323,26 +329,41 @@ class Trainer:
 
     @staticmethod
     def build_dataset(
-        data_reader: Union[str, Dataset, IterableDataset],
+        data_reader: Literal['MapDataReader', 'IterableDataReader'],
         data_path: Union[str, Path],
         data_processor: str = 'BaseDataProcessor',
         rank: int = 0,
         world_size: int = 1,
     ):
-        if isinstance(data_reader, str):
-            data_reader = getattr(reader, data_reader)
-
-        if isinstance(data_reader, Dataset):
+        if data_reader == 'MapDataReader':
             dataset = MapDataReader(data_path, data_processor)
-        elif isinstance(data_reader, IterableDataset):
+        elif data_reader == 'IterableDataReader':
             dataset = IterableDataReader(data_path, data_processor, rank, world_size)
         else:
-            dataset = data_reader(data_path, data_processor)
+            raise NotImplementedError(
+                f'\033[1;33mUnsupported DataReader: {data_reader}\033[0m'
+            )
 
         return dataset
 
-    def build_dataloader(self):
-        pass
+    @staticmethod
+    def build_dataloader(
+        dataset, batch_size: int,
+        shuffle: bool,
+        num_workers: int,
+        distributed: bool = True,
+    ):
+        if distributed:
+            sampler = DistributedSampler(dataset, shuffle=True)
+        else:
+            train_loader = DataLoader(
+                train_dataset,
+                sampler=train_sampler,
+                batch_size=args.batch_size,
+                num_workers=args.num_workers,
+                pin_memory=True,
+                drop_last=True,  # 实际上没有作用, 可以不写, 当sampler使用DistributedSampler, 需要在里面设置drop_last
+            )
 
 
 if __name__ == '__main__':
