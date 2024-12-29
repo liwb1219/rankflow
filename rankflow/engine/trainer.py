@@ -110,8 +110,8 @@ class Trainer:
                 batch_size=batch_size,
                 shuffle=False,
                 num_workers=1,
-                pin_memory=pin_memory,
-                drop_last=drop_last,
+                pin_memory=True,
+                drop_last=False,
                 distributed=enable_ddp,
             )
         else:
