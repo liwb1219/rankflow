@@ -30,18 +30,20 @@ class Trainer:
         work_dir: str = 'outputs',
         enable_amp: bool = True,
 
-        train_data_reader: Optional[Literal['MapDataReader', 'IterableDataReader']] = None,
+        train_data_reader: Literal['MapDataReader', 'IterableDataReader'] = 'MapDataReader',
         train_data_path: Optional[Union[str, Path]] = None,
         train_data_processor: str = 'BaseDataProcessor',
 
-        valid_data_reader: Optional[Literal['MapDataReader', 'IterableDataReader']] = None,
+        valid_data_reader: Literal['MapDataReader', 'IterableDataReader'] = 'MapDataReader',
         valid_data_path: Optional[Union[str, Path]] = None,
         valid_data_processor: str = 'BaseDataProcessor',
 
-        batch_size: int = 64,
-
-        train_dataloader: Optional[Union[DataLoader, List]] = None,
-        valid_dataloader: Optional[Union[DataLoader, List]] = None,
+        batch_size: int = 1,
+        shuffle: bool = True,
+        num_workers: int = 4,
+        pin_memory: bool = True,
+        drop_last: bool = False,
+        distributed: bool = True,
 
         log_level: Union[int, str] = 'DEBUG',
         log_file: Optional[str] = None,
@@ -75,19 +77,45 @@ class Trainer:
         self._work_dir = work_dir
         self._enable_amp = enable_amp
 
-        train_dataset = self.build_dataset(
-            data_reader=train_data_reader,
-            data_path=train_data_path,
-            data_processor=train_data_processor,
-            rank=self._rank,
-            world_size=self._world_size,
-        )
+        if train_data_path:
+            train_dataset = self.build_dataset(
+                data_reader=train_data_reader,
+                data_path=train_data_path,
+                data_processor=train_data_processor,
+                rank=self._rank,
+                world_size=self._world_size,
+            )
+            self.train_dataloader = self.build_dataloader(
+                dataset=train_dataset,
+                batch_size=batch_size,
+                shuffle=shuffle,
+                num_workers=num_workers,
+                pin_memory=pin_memory,
+                drop_last=drop_last,
+                distributed=enable_ddp,
+            )
+        else:
+            self.train_dataloader = None
 
-
-
-
-        self.train_dataloader = train_dataloader
-        self.valid_dataloader = valid_dataloader
+        if valid_data_reader:
+            valid_dataset = self.build_dataset(
+                data_reader=valid_data_reader,
+                data_path=valid_data_path,
+                data_processor=valid_data_processor,
+                rank=self._rank,
+                world_size=self._world_size,
+            )
+            self.valid_dataloader = self.build_dataloader(
+                dataset=valid_dataset,
+                batch_size=batch_size,
+                shuffle=False,
+                num_workers=1,
+                pin_memory=pin_memory,
+                drop_last=drop_last,
+                distributed=enable_ddp,
+            )
+        else:
+            self.valid_dataloader = None
 
         self.logger = setup_logger(
             log_level=log_level,
