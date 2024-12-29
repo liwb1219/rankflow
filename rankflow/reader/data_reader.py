@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # Copyright (c) 2024 liwenbiao. All rights reserved.
 
+import utils
 import torch
 from pathlib import Path
 from typing import Union
@@ -9,8 +10,12 @@ from torch.utils.data import Dataset, IterableDataset
 
 
 class MapDataReader(Dataset):
-    def __init__(self, data_path: Union[str, Path]):
-        data_processor = BaseDataProcessor()
+    def __init__(
+        self,
+        data_path: Union[str, Path],
+        processor: str = 'BaseDataProcessor',
+    ):
+        data_processor = getattr(utils, processor, BaseDataProcessor)()
         self.data = data_processor.run(data_path, 'batch')
 
     def __getitem__(self, index):
@@ -21,8 +26,14 @@ class MapDataReader(Dataset):
 
 
 class IterableDataReader(IterableDataset):
-    def __init__(self, data_path: Union[str, Path], rank: int = 0, world_size: int = 1):
-        self.data_processor = BaseDataProcessor()
+    def __init__(
+        self,
+        data_path: Union[str, Path],
+        processor: str = 'BaseDataProcessor',
+        rank: int = 0,
+        world_size: int = 1,
+    ):
+        self.data_processor = getattr(utils, processor, BaseDataProcessor)()
         self.data_path = data_path
         self.rank = rank
         self.world_size = world_size
