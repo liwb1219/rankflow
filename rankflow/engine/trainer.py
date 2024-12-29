@@ -16,9 +16,12 @@ import weakref
 
 from rankflow.engine.hooks import HookBase
 from rankflow.engine.hooks import HookPriority, get_priority
+from rankflow.reader.utils import BaseDataProcessor
 from rankflow.utils.logger import setup_logger
 from rankflow.utils.message_hub import MessageHub
 from rankflow.optim import OptimSchedulerWrapper
+from rankflow import reader
+from rankflow.reader import MapDataReader, IterableDataReader
 
 
 class Trainer:
@@ -28,10 +31,13 @@ class Trainer:
         work_dir: str = 'outputs',
         enable_amp: bool = True,
 
+        train_data_reader: Optional[Union[str, Dataset, IterableDataset]] = None,
         train_data_path: Optional[Union[str, Path]] = None,
+        train_data_processor: str = 'BaseDataProcessor',
+
+        valid_data_reader: Optional[Union[str, Dataset, IterableDataset]] = None,
         valid_data_path: Optional[Union[str, Path]] = None,
-        data_processor: str = 'BaseDataProcessor',
-        data_reader: Optional[Union[str, Dataset, IterableDataset]] = None,
+        valid_data_processor: str = 'BaseDataProcessor',
 
         batch_size: int = 64,
 
@@ -69,6 +75,24 @@ class Trainer:
         self.model = model
         self._work_dir = work_dir
         self._enable_amp = enable_amp
+
+        if isinstance(train_data_reader, Dataset):
+            data_reader = MapDataReader(train_data_path, train_data_processor)
+        elif isinstance(train_data_reader, IterableDataset):
+            data_reader = IterableDataReader(train_data_path, train_data_processor)
+        elif isinstance(train_data_reader, str):
+            data_reader = getattr(reader, train_data_reader)(train_data_path, train_data_processor)
+        else:
+            raise RuntimeError()
+
+        TrainDataReader = getattr(reader, train_data_reader)
+        if isinstance(train_data_reader, Dataset):
+            train_data_reader = TrainDataReader(train_data_path, train_data_processor)
+
+
+
+
+
 
         self.train_dataloader = train_dataloader
         self.valid_dataloader = valid_dataloader
@@ -310,6 +334,29 @@ class Trainer:
         model_save_path = Path(self.work_dir).resolve().joinpath(save_dir, model_dir, filename)
         model_save_path.parent.mkdir(parents=True, exist_ok=True)
         torch.save(model.state_dict(), model_save_path)
+
+    @staticmethod
+    def build_dataset(
+        data_reader: Union[str, Dataset, IterableDataset],
+        data_path: Optional[Union[str, Path]] = None,
+        data_processor: str = 'BaseDataProcessor',
+        rank: int = 0,
+        world_size: int = 1,
+    ):
+        if isinstance(data_reader, str):
+            data_reader = getattr(reader, data_reader)
+
+        if isinstance(data_reader, Dataset):
+            dataset = MapDataReader(data_path, data_processor)
+        elif isinstance(data_reader, IterableDataset):
+            dataset = IterableDataReader(data_path, data_processor, rank, world_size)
+        else:
+            dataset = data_reader(data_path, data_processor)
+
+        return dataset
+
+    def build_dataloader(self):
+        pass
 
 
 if __name__ == '__main__':
