@@ -30,12 +30,12 @@ class Trainer:
         work_dir: str = 'outputs',
         enable_amp: bool = True,
 
-        train_data_reader: Literal['MapDataReader', 'IterableDataReader'] = 'MapDataReader',
         train_data_path: Optional[Union[str, Path]] = None,
+        train_data_reader: Literal['MapDataReader', 'IterableDataReader'] = 'MapDataReader',
         train_data_processor: str = 'BaseDataProcessor',
 
-        valid_data_reader: Literal['MapDataReader', 'IterableDataReader'] = 'MapDataReader',
         valid_data_path: Optional[Union[str, Path]] = None,
+        valid_data_reader: Literal['MapDataReader', 'IterableDataReader'] = 'MapDataReader',
         valid_data_processor: str = 'BaseDataProcessor',
 
         batch_size: int = 1,
