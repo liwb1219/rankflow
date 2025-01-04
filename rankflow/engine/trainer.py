@@ -386,34 +386,16 @@ class Trainer:
     ):
         if isinstance(dataset, Dataset):
             sampler = DistributedSampler(dataset, shuffle=shuffle) if distributed else None
+            shuffle = None if sampler is not None else shuffle
             dataloader = DataLoader(
                 dataset=dataset,
                 batch_size=batch_size,
-                shuffle=None if sampler is not None else shuffle,
+                shuffle=shuffle,
                 sampler=sampler,
                 num_workers=num_workers,
                 pin_memory=pin_memory,
                 drop_last=drop_last,
             )
-            if distributed:
-                sampler = DistributedSampler(dataset, shuffle=shuffle)
-                dataloader = DataLoader(
-                    dataset=dataset,
-                    batch_size=batch_size,
-                    sampler=sampler,
-                    num_workers=num_workers,
-                    pin_memory=pin_memory,
-                    drop_last=drop_last,
-                )
-            else:
-                dataloader = DataLoader(
-                    dataset=dataset,
-                    batch_size=batch_size,
-                    shuffle=shuffle,
-                    num_workers=num_workers,
-                    pin_memory=pin_memory,
-                    drop_last=drop_last,
-                )
         elif isinstance(dataset, IterableDataset):
             dataloader = DataLoader(
                 dataset=dataset,
