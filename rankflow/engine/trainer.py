@@ -385,6 +385,16 @@ class Trainer:
         distributed: bool = True,
     ):
         if isinstance(dataset, Dataset):
+            sampler = DistributedSampler(dataset, shuffle=shuffle) if distributed else None
+            dataloader = DataLoader(
+                dataset=dataset,
+                batch_size=batch_size,
+                shuffle=None if sampler is not None else shuffle,
+                sampler=sampler,
+                num_workers=num_workers,
+                pin_memory=pin_memory,
+                drop_last=drop_last,
+            )
             if distributed:
                 sampler = DistributedSampler(dataset, shuffle=shuffle)
                 dataloader = DataLoader(
