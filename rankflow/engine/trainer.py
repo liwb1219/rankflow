@@ -390,8 +390,8 @@ class Trainer:
             dataloader = DataLoader(
                 dataset=dataset,
                 batch_size=batch_size,
-                shuffle=shuffle,
                 sampler=sampler,
+                shuffle=shuffle,
                 num_workers=num_workers,
                 pin_memory=pin_memory,
                 drop_last=drop_last,
